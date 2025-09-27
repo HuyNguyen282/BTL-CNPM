@@ -1,5 +1,5 @@
 import express from 'express';
-import configViewEngine from './config/viewEngine';
+import configViewEngine from './config/viewEngine.js';
 import dotenv from 'dotenv';
 dotenv.config()
 const app = express();
