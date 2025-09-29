@@ -8,14 +8,55 @@
 </head>
 
 <body>
-    <h1>
-        <span class="blue">GO</span><span class="red">AT</span>
-    </h1>
+    <div class="topnav">
+        <a class="active" href="/">Home</a>
+        <a href="/news">News</a>
+        <a href="/contact">Contact</a>
+        <a href="/about">About</a>
+    </div>
 
-    <img src="/img/img.jpg" alt="">
-    <br>
-    <h2>7 đĩ</h2>
-    <img src="/img/images.jpg" alt="">
+    <div style="padding-left:16px">
+        <h2>DANH SÁCH NGƯỜI DÙNG</h2>
+    </div>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Tên người dùng</th>
+                <th>Mật khẩu</th>
+                <th>Email</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (data && data.length> 0) { %>
+                <% for (let i=0; i < data.length; i++) { %>
+                    <tr>
+                        <td>
+                            <%= data[i].username %>
+                        </td>
+                        <td>
+                            <%= data[i].password %>
+                        </td>
+                        <td>
+                            <%= data[i].email %>
+                        </td>
+                        <td>
+                            <button type="button">Sửa</button>
+                            <button type="button">Xóa</button>
+                            <button type="button">Chi tiết</button>
+                        </td>
+                    </tr>
+                    <% } %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4">Không có user nào</td>
+                            </tr>
+                            <% } %>
+
+        </tbody>
+    </table>
+
 </body>
 
 </html>
