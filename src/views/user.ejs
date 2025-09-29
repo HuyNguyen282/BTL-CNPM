@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết User</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="topnav">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a class="active" href="/users/detail/<%=data.username %>">Chi tiết</a>
+    </div>
+
+    <div style="padding:16px">
+        <h2>Thông tin chi tiết user</h2>
+
+        <table border="1" cellpadding="8" cellspacing="0">
+            <tr>
+                <th>Username</th>
+                <td>
+                    <%= data.username %>
+                </td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>
+                    <%= data.email %>
+                </td>
+            </tr>
+            <tr>
+                <th>Password</th>
+                <td>
+                    <%= data.password %>
+                </td>
+            </tr>
+        </table>
+
+        <br>
+        <a href="/">
+            <button type="button">⬅ Quay lại danh sách</button>
+        </a>
+    </div>
+</body>
+
+</html>

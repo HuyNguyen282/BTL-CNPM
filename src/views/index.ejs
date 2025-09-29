@@ -21,7 +21,6 @@
         <thead>
             <tr>
                 <th>Tên người dùng</th>
-                <th>Mật khẩu</th>
                 <th>Email</th>
                 <th>Hành động</th>
             </tr>
@@ -34,15 +33,10 @@
                             <%= data[i].username %>
                         </td>
                         <td>
-                            <%= data[i].password %>
-                        </td>
-                        <td>
                             <%= data[i].email %>
                         </td>
                         <td>
-                            <button type="button">Sửa</button>
-                            <button type="button">Xóa</button>
-                            <button type="button">Chi tiết</button>
+                            <a href="/users/detail/<%= data[i].username %>">Chi tiết</a>
                         </td>
                     </tr>
                     <% } %>
