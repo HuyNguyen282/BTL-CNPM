@@ -11,6 +11,8 @@
     <div class="topnav">
         <a class="active" href="/">Home</a>
         <a href="/about">About</a>
+        <a href="/signup">Đăng ký</a>
+        <a href="/login">Đăng nhập</a>
     </div>
 
     <div style="padding-left:16px">
@@ -22,7 +24,6 @@
             <tr>
                 <th>Tên người dùng</th>
                 <th>Email</th>
-                <th>Hành động</th>
             </tr>
         </thead>
         <tbody>
@@ -34,9 +35,6 @@
                         </td>
                         <td>
                             <%= data[i].email %>
-                        </td>
-                        <td>
-                            <a href="/users/detail/<%= data[i].username %>">Chi tiết</a>
                         </td>
                     </tr>
                     <% } %>

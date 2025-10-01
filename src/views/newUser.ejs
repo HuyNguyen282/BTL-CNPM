@@ -1,0 +1,35 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="topnav">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a class="active" href="/signup">Đăng ký</a>
+        <a href="/login">Đăng nhập</a>
+
+
+    </div>
+    <h2 style="text-align: center; margin: 20px 0; color: #333;">
+        Đăng ký tài khoản mới
+    </h2>
+
+    <form action="/signup" method="POST">
+        <input type="text" name="username" placeholder="Username" required>
+        <br>
+        <input type="email" name="email" placeholder="Email" required>
+        <br>
+        <input type="password" name="password" placeholder="Password" autocomplete="off" required>
+        <br>
+        <button type="submit">Đăng ký</button>
+    </form>
+
+</body>
+
+</html>

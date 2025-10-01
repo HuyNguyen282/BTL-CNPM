@@ -54,3 +54,48 @@ th {
     background-color: #04AA6D;
     color: white;
 }
+
+/* Form đăng ký */
+form {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    margin: 30px auto;
+}
+
+form input {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: 0.2s;
+    font-size: 15px;
+}
+
+form input:focus {
+    border-color: #04AA6D;
+    outline: none;
+    box-shadow: 0 0 5px rgba(4, 170, 109, 0.6);
+}
+
+form button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 6px;
+    background-color: #04AA6D;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+form button:hover {
+    background-color: #038c55;
+    transform: translateY(-2px);
+}
