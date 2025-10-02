@@ -49,35 +49,44 @@ export const loginPage = (req, res) => {
 
 export const handleLogin = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
-        const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+        const [rows] = await pool.query(
+            "SELECT * FROM users WHERE username = ? OR email = ?",
+            [username, username]
+        );
 
-        if (rows.length === 0) return res.status(400).send("⚠️ Người dùng không tồn tại");
+        if (rows.length === 0) {
+            return res.status(400).send("Người dùng không tồn tại");
+        }
 
         const user = rows[0];
 
         const match = await bcrypt.compare(password, user.password);
-        if (!match) return res.status(400).send("⚠️ Sai mật khẩu");
+        if (!match) {
+            return res.status(400).send("Sai mật khẩu");
+        }
 
         return res.render("user.ejs", { data: user });
+
     } catch (err) {
-        console.error("❌ Lỗi login:", err);
+        console.error("Lỗi login:", err);
         return res.status(500).send("Lỗi server khi login");
     }
 };
 
+
 export const handleDelete = async (req, res) => {
     try {
-        const { email } = req.params; // nếu route là /users/delete/:email
+        const { email } = req.params;
 
         const [result] = await pool.query("DELETE FROM users WHERE email = ?", [email]);
 
-        if (result.affectedRows === 0) return res.status(404).send("❌ User không tồn tại");
+        if (result.affectedRows === 0) return res.status(404).send("User không tồn tại");
 
         return res.redirect("/");
     } catch (err) {
-        console.error("❌ Lỗi khi xoá user:", err);
+        console.error("Lỗi khi xoá user:", err);
         return res.status(500).send("Lỗi server khi xoá user");
     }
 };
