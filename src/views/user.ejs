@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="topnav">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/signup">Đăng ký</a>
+        <a href="/login">Đăng nhập</a>
+
+        <a class="active" href="/users/detail/<%= data.username %>">Chi tiết</a>
+    </div>
+
+    <h2 style="text-align:center; margin:20px 0;">Thông tin chi tiết user</h2>
+
+    <table border="1" cellpadding="8" cellspacing="0" style="margin:auto;">
+        <tr>
+            <th>Username</th>
+            <td>
+                <%= data.username %>
+            </td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>
+                <%= data.email %>
+            </td>
+        </tr>
+        <tr>
+            <th>Password</th>
+            <td>
+                <%= data.password %>
+            </td>
+        </tr>
+    </table>
+    <form method="POST" action="/users/delete/<%= data.email %>">
+        <button type="submit" onclick="return confirm('Bạn có chắc muốn xóa user này không?')">
+            Xóa user
+        </button>
+    </form>
+
+</body>
+
+</html>
