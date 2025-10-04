@@ -208,27 +208,3 @@ p.auth-sgt {
     color: #06131eb5;
     cursor: pointer;
 }
-
-/* responsive */
-@media screen and (max-width: 720px) {
-    body {
-        background-color: #fff;
-    }
-    .auth-container {
-        max-width: 100%;
-        max-height: 100vh;
-        margin: 0 auto;
-        background: #fff;
-        border-radius: 0;
-        box-shadow: none;
-        display: block;
-        margin-top: 0;
-    }
-    .auth-action-left {
-        width: 100%;
-    }
-
-    .auth-action-right {
-        display: none;
-    }
-}
