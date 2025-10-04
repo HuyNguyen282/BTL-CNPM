@@ -11,7 +11,7 @@ Phần mềm quản lý tài chính cá nhân là công cụ giúp người dùn
 - Cùng các chức năng khác
 ### Công nghệ sử dụng 
 - HTML/CSS/Javascript
-- Boostrap
+- Bootstrap
 - NodeJS
 #### Hướng dẫn cài đặt và sử dụng 
 **Bước 1**: Cài đặt
