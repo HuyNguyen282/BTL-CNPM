@@ -23,12 +23,19 @@ Phần mềm quản lý tài chính cá nhân là công cụ giúp người dùn
 -Đổi host, user, password theo **MySQL Workbench** trên máy
 -Mở **MySQL Workbench**, chạy lệnh theo thứ tự:
 ```
-(1) create database a;
-(2) use a;
-(3) CREATE TABLE users (
-  username VARCHAR(50) NOT NULL,
-  email VARCHAR(100) NOT NULL UNIQUE PRIMARY KEY,
-  password VARCHAR(255) NOT NULL
+--B1: Tạo CSDL
+CREATE DATABASE a;
+
+--B2: SỬ DỤNG CSDL
+USE a;
+
+--B3: TẠO BẢNG USERS
+CREATE TABLE users (
+  username VARCHAR(50) NOT NULL UNIQUE,
+  email VARCHAR(100) NOT NULL PRIMARY KEY,
+  password VARCHAR(255) NOT NULL,
+  reset_token VARCHAR(255),
+  reset_token_expire DATETIME
 );
 ```
 **Bước 3**: Chạy trên localhost
