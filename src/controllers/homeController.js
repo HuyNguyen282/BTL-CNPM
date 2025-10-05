@@ -74,21 +74,6 @@ export const handleLogin = async (req, res) => {
     }
 };
 
-// export const handleDelete = async (req, res) => {
-//     try {
-//         const { email } = req.params;
-
-//         const [result] = await pool.query("DELETE FROM users WHERE email = ?", [email]);
-
-//         if (result.affectedRows === 0) return res.status(404).send("<script>alert('Người dùng không tồn tại!'); window.history.back();</script>");
-
-//         return res.redirect("/");
-//     } catch (err) {
-//         console.error("Lỗi khi xoá user:", err);
-//         return res.status(500).send("<script>alert('Lỗi server khi xoá user'); window.history.back();</script>");
-//     }
-// };
-
 export const enterMailPage = (req, res) => {
     return res.render("enterMail.ejs");
 };
