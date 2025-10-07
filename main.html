@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trang chủ</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- CSS riêng -->
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <!-- Start NAVBAR  -->
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-gradient px-2 custom-navbar">
+    <img src="img/552783237_1095201732776549_4395309577322638889_n.svg" alt="logo" width="100"  height="80">
+    <a class="navbar-brand" href="main.html">EggHead</a>
+
+    <div class="ms-auto d-flex align-items-center">
+    <button class="btn btn-sm btn-outline-secondary me-2 btn-notify bell-custom" aria-label="Thông báo">
+      <i class="fa-regular fa-bell"></i>
+    </button>
+
+
+      <!-- Avatar -->
+      <div class="position-relative">
+        <button id="userBtn" class="btn p-0 border-0 bg-transparent" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
+          <img src="https://i.pravatar.cc/300" alt="Avatar" class="user-avatar" id="userAvatar">
+        </button>
+
+        <!-- Dropdown -->
+        <div id="userMenu" class="position-absolute end-0 mt-2 user-dropdown bg-white d-none" role="menu" aria-labelledby="userBtn">
+          <div class="profile-top">
+            <img src="https://i.pravatar.cc/300" alt="Avatar small">
+            <div class="meta">
+              <div class="name" id="menuName">Nguyễn Huy</div>
+              <div class="small" id="menuEmail">nguyen.huy@example.com</div>
+              <div class="money" id="money">Số dư:</div>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <a href="#" id="viewProfile" role="menuitem">
+              <i class="fa-regular fa-user"></i> <span>Xem hồ sơ</span>
+            </a>
+            <a href="#" id="settings" role="menuitem">
+              <i class="fa-regular fa-gear"></i> <span>Cài đặt</span>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="logout" role="menuitem" class="text-danger">
+              <i class="fa-solid fa-right-from-bracket"></i> <span>Đăng xuất</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- END NAVBAR -->
+  <!-- Start SIDEBAR -->
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column p-3">
+      <div class="sidebar-header mb-3 d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-black">EggHead</span>
+        <button class="btn btn-sm btn-outline-dark toggle-btn ">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+    <div class="chat-list flex-grow-1 overflow-auto">
+      <a href="trang_chu.html" class="chat-item active" data-file="trang_chu.html">
+        <i class="fa-regular fa-message"></i>
+        <span>Trang chủ</span>
+      </a>
+      <a href="#" class="chat-item" data-file="forget-pwd.html">
+        <i class="fa-regular fa-message"></i>
+        <span>Chỉnh sửa ngân sách</span>
+      </a>
+      <a href="#" class="chat-item" data-file="forget-pwd.html">
+        <i class="fa-regular fa-message"></i>
+        <span>Chỉnh sửa chi tiêu</span>
+      </a>
+      <a href="#" class="chat-item" data-file="bieudo.html">
+        <i class="fa-regular fa-message"></i>
+        <span>Biểu đồ</span>
+      </a>
+      <a href="#" class="chat-item" data-file="lichsu.html">
+        <i class="fa-regular fa-message"></i>
+        <span>Lịch sử giao dịch</span>
+      </a>
+    </div>
+
+      <div class="sidebar-footer mt-3">
+      </div>
+    </div>
+
+    <!-- Main content -->
+   <!-- Main content -->
+    <div id="main-content" class="content flex-grow-1 p-3">
+
+    </div>
+
+  
+
+  <!-- Bootstrap JS + File JS riêng -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
