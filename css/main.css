@@ -134,7 +134,12 @@ body {
   width: 260px;
   background-color: #ffffff;
   transition: width 0.3s;
-  height: 100vh;
+  height: 125vh;
+  border-right: 1px solid #e5e7eb;
+  /* position: absolute; */
+  top: 0;
+  left: 0;
+  overflow-y: auto;
 }
 
 .sidebar.collapsed {
@@ -184,7 +189,10 @@ body {
 .user-box {
   background-color: #d1d3e3;
 }
-
+.main-content{
+  margin-left: 260px;
+  padding: 20px;
+}
 .content {
   background-color: #F8F9FA;
   border-left: 1px solid #3e3f4b;

@@ -171,4 +171,87 @@ async function loadPage(fileName) {
     mainContent.innerHTML = `<p class="text-danger text-center mt-5">❌ Lỗi tải nội dung: ${err.message}</p>`;
   }
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const addBudgetForm = document.getElementById("addBudgetForm");
+  const budgetList = document.getElementById("budgetList");
 
+  // Nếu không có phần add ngân sách thì bỏ qua
+  if (!addBudgetForm || !budgetList) return;
+
+  // Lưu dữ liệu ngân sách vào localStorage
+  function saveBudgets(budgets) {
+    localStorage.setItem("budgets", JSON.stringify(budgets));
+  }
+
+  // Lấy dữ liệu ngân sách từ localStorage
+  function loadBudgets() {
+    return JSON.parse(localStorage.getItem("budgets")) || [];
+  }
+
+  // Hiển thị danh sách ngân sách
+  function renderBudgets() {
+    const budgets = loadBudgets();
+    budgetList.innerHTML = "";
+
+    if (budgets.length === 0) {
+      budgetList.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Chưa có dữ liệu</td></tr>`;
+      return;
+    }
+
+    budgets.forEach((b, i) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${b.name}</td>
+        <td>${b.amount.toLocaleString()} VNĐ</td>
+      `;
+      budgetList.appendChild(row);
+    });
+  }
+
+  // Sự kiện thêm mới ngân sách
+  addBudgetForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("budgetName").value.trim();
+    const amount = parseFloat(document.getElementById("budgetAmount").value);
+
+    if (!name || isNaN(amount) || amount <= 0) {
+      alert("Vui lòng nhập thông tin hợp lệ!");
+      return;
+    }
+
+    const budgets = loadBudgets();
+    budgets.push({ name, amount });
+    saveBudgets(budgets);
+
+    addBudgetForm.reset();
+    renderBudgets();
+  });
+
+  // Hiển thị danh sách khi trang load
+  renderBudgets();
+});
+document.querySelectorAll(".has-submenu").forEach(parent => {
+    parent.addEventListener("click", function(e) {
+      e.preventDefault();
+      const submenu = this.nextElementSibling;
+      submenu.style.display = (submenu.style.display === "block") ? "none" : "block";
+    });
+  });
+
+  // Load nội dung vào main
+  document.querySelectorAll(".chat-item[data-file]").forEach(item => {
+    item.addEventListener("click", function(e) {
+      e.preventDefault();
+      const file = this.getAttribute("data-file");
+      fetch(file)
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById("mainContent").innerHTML = html;
+        })
+        .catch(err => {
+          document.getElementById("mainContent").innerHTML = "<p>Lỗi tải file!</p>";
+          console.error(err);
+        });
+    });
+  });

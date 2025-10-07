@@ -23,13 +23,13 @@
         <div class="card shadow-lg rounded-4">
           <div class="card-body p-4">
 
-            <h3 class="mb-4 text-center">Thêm ngân sách</h3>
+            <h3 class="mb-4 text-center">Thêm khoản chi</h3>
 
             <!-- Form -->
             <form>
               <!-- Tên ngân sách -->
               <div class="mb-3">
-                <label for="budgetName" class="form-label">Tên ngân sách</label>
+                <label for="budgetName" class="form-label">Khoản chi</label>
                 <input type="text" class="form-control" id="budgetName" placeholder="Ví dụ: Ăn uống, Mua sắm..." required>
               </div>
 
@@ -38,23 +38,12 @@
                 <label for="amount" class="form-label">Số tiền</label>
                 <input type="number" class="form-control" id="amount" placeholder="Nhập số tiền" required>
               </div>
+              <!-- Ngày chi -->
+               <div class="mb-3">
+                    <label for="days" class="form-label">Ngày</label>
+                    <input type="date" class="form-control" id="days" required>
+               </div>
 
-              <!-- Chu kỳ -->
-              <div class="mb-3">
-                <label for="period" class="form-label">Chu kỳ</label>
-                <select class="form-select" id="period">
-                  <option value="monthly">Hàng tháng</option>
-                  <option value="weekly">Hàng tuần</option>
-                  <option value="yearly">Hàng năm</option>
-                  <option value="custom">Khác</option>
-                </select>
-              </div>
-
-              <!-- Ngày bắt đầu -->
-              <div class="mb-3">
-                <label for="startDate" class="form-label">Ngày bắt đầu</label>
-                <input type="date" class="form-control" id="startDate" required>
-              </div>
 
               <!-- Ghi chú -->
               <div class="mb-3">
@@ -65,7 +54,7 @@
               <!-- Nút -->
               <div class="d-flex justify-content-between">
                 <a href="main.html" class="btn btn-outline-secondary">Hủy</a>
-                <button type="submit" class="btn btn-primary">Lưu ngân sách</button>
+                <button type="submit" class="btn btn-primary">Lưu</button>
               </div>
             </form>
 
