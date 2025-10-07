@@ -1,0 +1,43 @@
+<div class="container py-5">
+  <h3 class="text-center mb-4">Danh sách ngân sách</h3>
+
+  <div id="budgetList" class="row g-3"></div>
+
+  <div class="text-center mt-4">
+    <button class="btn btn-success" onclick="loadPage('themchitieu')">+ Thêm khoản chi mới</button>
+  </div>
+</div>
+
+<!-- Modal chỉnh sửa -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Chỉnh sửa khoản chi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
+          <input type="hidden" id="editIndex">
+          <div class="mb-3">
+            <label class="form-label">Tên khoản chi</label>
+            <input type="text" class="form-control" id="editName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Số tiền</label>
+            <input type="number" class="form-control" id="editAmount" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ngày</label>
+            <input type="date" class="form-control" id="editStartDate" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ghi chú</label>
+            <textarea class="form-control" id="editNote" rows="2"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Lưu thay đổi</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

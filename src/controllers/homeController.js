@@ -2,19 +2,12 @@ import pool from "../config/connectDB.js";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import session from "express-session";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export const getHomePage = async (req, res) => {
-    const [rows] = await pool.query("SELECT * FROM users");
-    return res.render("index.ejs", { data: rows });
-};
-
-export const getDetailPage = async (req, res) => {
-    const { username } = req.params;
-    const [rows] = await pool.query("SELECT * FROM users WHERE username = ?", [username]);
-
-    if (rows.length === 0) return res.status(404).send("<script>alert('Người dùng không tồn tại!'); window.history.back();</script>");
-
-    return res.render("user.ejs", { data: rows[0] });
+    return res.render("index.ejs");
 };
 
 export const signUpPage = (req, res) => {
@@ -42,10 +35,6 @@ export const handleSignUp = async (req, res) => {
     }
 };
 
-export const loginPage = (req, res) => {
-    return res.render("login.ejs");
-};
-
 export const handleLogin = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -65,8 +54,8 @@ export const handleLogin = async (req, res) => {
         if (!match) {
             return res.status(400).send("<script>alert('Sai mật khẩu!'); window.history.back();</script>");
         }
-
-        return res.render("user.ejs", { data: user });
+        req.session.user = user;
+        return res.redirect("/trangchu");
 
     } catch (err) {
         console.error("Lỗi login:", err);
@@ -162,4 +151,26 @@ export const handleResetPasswordRequest = async (req, res) => {
         console.error("Lỗi reset password:", err);
         return res.status(500).send("Lỗi server khi reset password");
     }
+};
+
+export const handleLogout = (req, res) => {
+    req.session.destroy(err => {
+        if (err) console.log(err);
+        res.redirect("/");
+    });
+};
+
+export const mainPage = (req, res) => {
+    return res.render("main.ejs");
+};
+
+export const loadContent = (req, res) => {
+    const page = req.params.page;
+    res.render(`contents/${page}.ejs`, {}, (err, html) => {
+        if (err) {
+            console.error("Lỗi khi tải trang:", err.message);
+            return res.status(404).send(`<p class="text-danger text-center mt-5">❌ Không tìm thấy trang: ${page}</p>`);
+        }
+        res.send(html);
+    });
 };

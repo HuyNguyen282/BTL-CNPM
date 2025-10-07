@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trang chính</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- CSS riêng -->
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .chat-item.active {
+      background-color: #e9ecef;
+      border-radius: 5px;
+    }
+
+    .menu-parent.active {
+      background-color: #dee2e6;
+      border-radius: 5px;
+    }
+
+    .submenu a.chat-item {
+      display: block;
+      padding: 5px 10px;
+      margin-bottom: 2px;
+    }
+
+    .sidebar {
+      position: relative;
+      z-index: 1;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      z-index: 1050;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-gradient px-3 custom-navbar align-items-center">
+    <img src="/img/logo.svg" alt="logo" width="100" height="80">
+    <a class="navbar-brand" href="#">EggHead</a>
+
+    <!-- Chuông thông báo -->
+    <div class="position-relative ms-auto d-flex align-items-center me-3">
+      <button id="bellBtn" class="btn btn-sm btn-outline-secondary position-relative me-2 btn-notify bell-custom">
+        <i class="fa-solid fa-bell"></i>
+        <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+          id="notifyCount">0</span>
+      </button>
+    </div>
+
+    <!-- Avatar user -->
+    <div class="position-relative">
+      <button id="userBtn" class="btn p-0 border-0 bg-transparent">
+        <img src="https://i.pravatar.cc/300" alt="Avatar" class="user-avatar" id="userAvatar">
+      </button>
+      <div id="userMenu" class="position-absolute end-0 mt-2 user-dropdown bg-white d-none">
+        <div class="profile-top">
+          <img src="https://i.pravatar.cc/300" alt="Avatar small">
+          <div class="meta">
+            <div class="name" id="menuName">Nguyễn Huy</div>
+            <div class="small" id="menuEmail">nguyen.huy@example.com</div>
+            <div class="money" id="money">Số dư:</div>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <a href="#" id="viewProfile"><i class="fa-regular fa-user"></i> Xem hồ sơ</a>
+          <a href="#" id="settings"><i class="fa-solid fa-gear"></i> Cài đặt</a>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="text-danger" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Đăng
+            xuất</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- END NAVBAR -->
+
+  <!-- SIDEBAR + MAIN -->
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column p-3 bg-light" style="width: 250px;">
+      <div class="sidebar-header mb-3 d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-black">EggHead</span>
+      </div>
+
+      <div class="chat-list flex-grow-1 overflow-auto">
+        <!-- Menu chính -->
+        <a href="#" class="chat-item active" data-file="trang_chu"><i class="fa-solid fa-house"></i> Trang chủ</a>
+
+        <!-- Menu cha + submenu -->
+        <a class="menu-parent" data-bs-toggle="collapse" href="#subBudget" role="button" aria-expanded="false">
+          <i class="fa-solid fa-money-bill-wave"></i> Chỉnh sửa ngân sách
+        </a>
+        <div class="collapse ms-3" id="subBudget">
+          <a href="#" class="chat-item" data-file="Budget">➕ Thêm ngân sách</a>
+          <a href="#" class="chat-item" data-file="viewbud">✏️ Chỉnh sửa ngân sách</a>
+        </div>
+
+        <a class="menu-parent" data-bs-toggle="collapse" href="#subChiTieu" role="button" aria-expanded="false">
+          <i class="fa-solid fa-piggy-bank"></i> Chỉnh sửa chi tiêu
+        </a>
+        <div class="collapse ms-3" id="subChiTieu">
+          <a href="#" class="chat-item" data-file="themchitieu">➕ Thêm chi tiêu</a>
+          <a href="#" class="chat-item" data-file="chinhsuakhoanchi">✏️ Chỉnh sửa khoản chi</a>
+        </div>
+
+        <a href="#" class="chat-item" data-file="bieudo"><i class="fa-regular fa-chart-bar"></i> Biểu đồ</a>
+        <a href="#" class="chat-item" data-file="lichsu"><i class="fa-regular fa-clock"></i> Lịch sử giao dịch</a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div id="main-content" class="content flex-grow-1 p-3"></div>
+  </div>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const mainContent = document.getElementById("main-content");
+      const sidebar = document.querySelector(".chat-list");
+      const userBtn = document.getElementById("userBtn");
+      const userMenu = document.getElementById("userMenu");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      // Load nội dung AJAX
+      async function loadPage(pageName) {
+        mainContent.innerHTML = `
+          <div class="text-center mt-5">
+            <div class="spinner-border text-secondary" role="status"></div>
+            <p class="mt-3">Đang tải nội dung...</p>
+          </div>
+        `;
+        try {
+          const res = await fetch(`/content/${pageName}`);
+          if (!res.ok) throw new Error('Không tìm thấy trang!');
+          const html = await res.text();
+          mainContent.innerHTML = html;
+          console.log("✅ Loaded:", pageName);
+        } catch (err) {
+          mainContent.innerHTML = `<p class="text-danger text-center mt-5">❌ ${err.message}</p>`;
+        }
+      }
+
+      // Event delegation cho sidebar
+      sidebar.addEventListener("click", (e) => {
+        const item = e.target.closest(".chat-item[data-file]");
+        if (!item) return;
+
+        e.preventDefault();
+
+        // Xóa active tất cả chat-item
+        sidebar.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
+        item.classList.add("active");
+
+        // Xóa active menu-parent
+        sidebar.querySelectorAll(".menu-parent").forEach(p => p.classList.remove("active"));
+        // highlight menu cha nếu submenu
+        const parentMenu = item.closest(".collapse")?.previousElementSibling;
+        if (parentMenu) parentMenu.classList.add("active");
+
+        const pageName = item.getAttribute("data-file");
+        loadPage(pageName);
+      });
+
+      // Toggle avatar dropdown
+      userBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); // 👈 ngăn event bubble
+        userMenu.classList.toggle("d-none");
+      });
+
+      // Click ngoài avatar dropdown để đóng
+      document.addEventListener("click", (e) => {
+        if (!userMenu.contains(e.target) && e.target !== userBtn) {
+          userMenu.classList.add("d-none");
+        }
+      });
+
+      // Xử lý logout với confirm
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const confirmLogout = confirm("Bạn có chắc muốn đăng xuất?");
+        if (confirmLogout) {
+          window.location.href = "/logout";
+        }
+      });
+
+      // Load mặc định
+      loadPage("trang_chu");
+    });
+  </script>
+</body>
+
+</html>
