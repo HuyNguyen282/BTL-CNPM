@@ -3,6 +3,53 @@ document.addEventListener("DOMContentLoaded", () => {
   const userBtn = document.getElementById('userBtn');
   const userMenu = document.getElementById('userMenu');
 
+// ====== THÔNG BÁO ======
+const bellBtn = document.getElementById("bellBtn");
+const notificationBox = document.getElementById("notificationBox");
+const notificationList = document.getElementById("notificationList");
+const notifyCount = document.getElementById("notifyCount");
+
+if (bellBtn) {
+  // Bấm vào chuông => hiện/ẩn box
+  bellBtn.addEventListener("click", (e) => {
+    e.stopPropagation(); // tránh lan ra ngoài
+    notificationBox.classList.toggle("d-none");
+  });
+
+  // Bấm ra ngoài => ẩn box
+  document.addEventListener("click", (e) => {
+    if (
+      !notificationBox.classList.contains("d-none") &&
+      !notificationBox.contains(e.target) &&
+      !bellBtn.contains(e.target)
+    ) {
+      notificationBox.classList.add("d-none");
+    }
+  });
+
+  // Load thông báo
+  async function loadNotifications() {
+    try {
+      const res = await fetch("http://localhost:3000/api/notifications");
+      const data = await res.json();
+
+      notifyCount.textContent = data.length;
+      notificationList.innerHTML = data.map(item => `
+        <li class="border-bottom py-2">
+          <strong>${item.title}</strong><br>
+          <small class="text-muted">${item.time}</small>
+        </li>
+      `).join("");
+    } catch (err) {
+      console.error("Lỗi load thông báo:", err);
+    }
+  }
+
+  loadNotifications();
+}
+
+
+  // ====== MENU AVATAR ======
   function toggleMenu() {
     const shown = !userMenu.classList.contains('d-none');
     if (shown) {
@@ -64,19 +111,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ====== LOAD NỘI DUNG ======
-  const mainContent = document.querySelector('.content'); // Hoặc #main-content
+  const mainContent = document.querySelector('.content');
 
-  (document.querySelectorAll('.chat-item')).forEach(item => {
+  document.querySelectorAll('.chat-item').forEach(item => {
     item.addEventListener('click', async (e) => {
       e.preventDefault();
-
-      (document.querySelectorAll('.chat-item')).forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
 
       const fileName = item.getAttribute('data-file');
       if (!fileName) return;
 
-      // Hiệu ứng loading
       mainContent.innerHTML = `
         <div class="text-center mt-5">
           <div class="spinner-border text-secondary" role="status"></div>
@@ -94,35 +139,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-  loadPage("trang_chu.html"); // mặc định load trang chủ khi mở web
 
-  // Gắn sự kiện cho sidebar item
-  const chatItems = document.querySelectorAll('.chat-item');
-  (document.querySelectorAll('.chat-item')).forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      (document.querySelectorAll('.chat-item')).forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
+  // ====== LOAD TRANG CHỦ MẶC ĐỊNH ======
+  loadPage("trang_chu.html");
 
-      const fileName = item.getAttribute('data-file');
-      if (fileName) loadPage(fileName);
-    });
-  });
-
-  // Gắn sự kiện cho logo
+  // ====== LOGO CLICK ======
   const logo = document.querySelector(".navbar-brand");
   logo.addEventListener("click", (e) => {
     e.preventDefault();
     loadPage("trang_chu.html");
   });
-  
 });
 
 async function loadPage(fileName) {
   const mainContent = document.querySelector('.content');
   if (!mainContent) return;
 
-  // Hiệu ứng loading
   mainContent.innerHTML = `
     <div class="text-center mt-5">
       <div class="spinner-border text-secondary" role="status"></div>
