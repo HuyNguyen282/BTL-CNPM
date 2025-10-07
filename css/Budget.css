@@ -9,11 +9,12 @@ body {
 }
 
 .navbar-brand1 {
-  font-size: 1 rem;
-  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  font-size: 1.6 rem;
+  background: linear-gradient(90deg, #2563eb, #7c3aed) !important;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-decoration: none;
 }
 
 /* Card chính */
