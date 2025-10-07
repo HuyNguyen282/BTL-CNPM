@@ -94,7 +94,7 @@ if (bellBtn) {
   });
 
   document.getElementById('logout').addEventListener('click', (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     if (confirm('Bạn có chắc muốn đăng xuất không?')) {
       alert('Đã đăng xuất (demo)');
     }
