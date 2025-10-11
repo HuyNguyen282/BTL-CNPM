@@ -1,33 +1,20 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const content = document.getElementById("content");
+// js/trang_chu.js
 
-  // Hàm tải trang HTML con 
-  async function loadPage(page) {
+document.addEventListener('DOMContentLoaded', () => {
+  // Hàm để lấy dữ liệu thống kê từ API của bạn và hiển thị
+  async function loadDashboardStats() {
     try {
-      const res = await fetch(page);
-      const html = await res.text();
-      content.innerHTML = html;
-    } catch (err) {
-      content.innerHTML = "<p class='text-danger'>Không thể tải nội dung.</p>";
+      // Giả sử bạn có API trả về dữ liệu thống kê
+      const response = await fetch('/api/statistics');
+      const stats = await response.json();
+
+      // Cập nhật các con số trên giao diện
+      document.getElementById('total-spending').textContent = `${stats.totalSpending.toLocaleString()}₫`;
+      document.getElementById('total-categories').textContent = stats.categoryCount;
+      document.getElementById('top-category').textContent = stats.topCategory || 'Chưa có';
+    } catch (error) {
+      console.error('Lỗi khi tải thống kê:', error);
     }
   }
-
-  // Khi mới vào -> hiển thị home
-  loadPage("home.html");
-
-  // Khi bấm vào logo
-  const logo = document.querySelector(".navbar-brand");
-  logo.addEventListener("click", (e) => {
-    e.preventDefault();
-    loadPage("home.html");
-  });
-
-  // Nếu sidebar có nút khác
-  document.querySelectorAll(".sidebar-link").forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const page = e.target.getAttribute("data-page");
-      loadPage(page);
-    });
-  });
+  // loadDashboardStats(); // Bỏ comment khi bạn có API
 });

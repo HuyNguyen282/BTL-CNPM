@@ -1,4 +1,5 @@
 import express from "express";
+import pool from "../config/connectDB.js";
 import { checkLogin } from "../middleware/checkLogin.js";
 import {
     getHomePage,
@@ -9,9 +10,12 @@ import {
     handleResetPasswordRequest,
     enterMailPage,
     handleSendMail,
-    mainPage,
     handleLogout,
-    loadContent
+    trang_chu,
+    budgetPage,
+    viewbudPage,
+    themchitieuPage,
+    chinhsuachitieuPage
 } from "../controllers/homeController.js";
 
 const router = express.Router();
@@ -31,9 +35,11 @@ const initWebRoute = (app) => {
     router.get("/forgot", forgotPasswordPage);
     router.post("/forgot", handleResetPasswordRequest);
 
-    router.get("/trangchu", checkLogin, mainPage);
-
-    router.get("/content/:page", checkLogin, loadContent);
+    router.get("/trang_chu/dashboard", checkLogin, trang_chu);
+    router.get("/trang_chu/budget", checkLogin, budgetPage);
+    router.get("/trang_chu/viewbud", checkLogin, viewbudPage);
+    router.get("/trang_chu/themchitieu", checkLogin, themchitieuPage);
+    router.get("/trang_chu/chinhsuakhoanchi", checkLogin, chinhsuachitieuPage);
 
     return app.use("/", router);
 };

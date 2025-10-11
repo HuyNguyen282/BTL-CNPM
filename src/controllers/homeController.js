@@ -6,6 +6,12 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 
+function getRandomIntInclusive(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 export const getHomePage = async (req, res) => {
     return res.render("index.ejs");
 };
@@ -20,10 +26,11 @@ export const handleSignUp = async (req, res) => {
         if (password !== confirmPassword) {
             return res.status(400).send("<script>alert('Mật khẩu không khớp!'); window.history.back();</script>");
         }
+        let id = getRandomIntInclusive(100000, 999999);
         const hashedPassword = await bcrypt.hash(password, 10);
         await pool.query(
-            "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-            [username, email, hashedPassword]
+            "INSERT INTO users (id, username, password, email) VALUES (?, ?, ?, ?)",
+            [id, username, hashedPassword, email]
         );
         return res.redirect("/");
 
@@ -31,6 +38,7 @@ export const handleSignUp = async (req, res) => {
         if (err.code === "ER_DUP_ENTRY") {
             return res.status(400).send("<script>alert('Email/Username đã tồn tại!'); window.history.back();</script>");
         }
+        console.error("Lỗi đăng ký:", err);
         return res.status(500).send("<script>alert('Lỗi server khi đăng ký'); window.history.back();</script>");
     }
 };
@@ -55,7 +63,7 @@ export const handleLogin = async (req, res) => {
             return res.status(400).send("<script>alert('Sai mật khẩu!'); window.history.back();</script>");
         }
         req.session.user = user;
-        return res.redirect("/trangchu");
+        return res.redirect("/trang_chu/dashboard");
 
     } catch (err) {
         console.error("Lỗi login:", err);
@@ -160,17 +168,63 @@ export const handleLogout = (req, res) => {
     });
 };
 
-export const mainPage = (req, res) => {
-    return res.render("main.ejs");
+export const trang_chu = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect("/");
+        }
+
+        const username = req.session.user.username;
+        const user_id = req.session.user.id;
+
+        const [statRows] = await pool.query(
+            "SELECT total_expense FROM statistics WHERE user_id = ?",
+            [user_id]
+        );
+
+        const total_expense = statRows.length > 0 ? statRows[0].total_expense : 0;
+
+        const [topCategoryRows] = await pool.query(
+            `
+            SELECT 
+                c.category_name 
+            FROM transactions t
+            JOIN category c ON t.category_id = c.category_id
+            WHERE t.user_id = ? AND c.type_expense IS NOT NULL AND c.soft_delete = 0
+            GROUP BY c.category_id
+            ORDER BY SUM(t.amount) DESC
+            LIMIT 1
+            `,
+            [user_id]
+        );
+
+        const topCategoryName = topCategoryRows.length > 0 ? topCategoryRows[0].category_name : "Chưa có";
+
+        const userData = {
+            total: total_expense || "Chưa có",
+            topCategory: topCategoryName || "Chưa có",
+        };
+
+        return res.render("contents/trang_chu.ejs", { user: userData });
+
+    } catch (err) {
+        console.error("Lỗi khi load trang_chu:", err);
+        return res.status(500).send("Lỗi server khi tải trang chủ");
+    }
 };
 
-export const loadContent = (req, res) => {
-    const page = req.params.page;
-    res.render(`contents/${page}.ejs`, {}, (err, html) => {
-        if (err) {
-            console.error("Lỗi khi tải trang:", err.message);
-            return res.status(404).send(`<p class="text-danger text-center mt-5">❌ Không tìm thấy trang: ${page}</p>`);
-        }
-        res.send(html);
-    });
+export const budgetPage = async (req, res) => {
+    res.render("contents/Budget.ejs");
+};
+
+export const viewbudPage = async (req, res) => {
+    res.render("contents/viewbud.ejs");
+};
+
+export const themchitieuPage = async (req, res) => {
+    res.render("contents/themchitieu.ejs");
+};
+
+export const chinhsuachitieuPage = async (req, res) => {
+    res.render("contents/chinhsuakhoanchi.ejs");
 };

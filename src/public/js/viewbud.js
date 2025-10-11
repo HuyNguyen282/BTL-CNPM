@@ -1,91 +1,88 @@
-document.addEventListener("DOMContentLoaded", function() {
-  const budgetList = document.getElementById("budgetList");
-  let budgets = JSON.parse(localStorage.getItem("budgets")) || [];
+// js/viewbud.js
 
+document.addEventListener("DOMContentLoaded", function () {
+  const budgetList = document.getElementById("budgetList");
   const editModal = new bootstrap.Modal(document.getElementById("editModal"));
   const editForm = document.getElementById("editForm");
+  let budgets = []; // Mảng để lưu dữ liệu từ server
 
-  function renderBudgets() {
-    budgetList.innerHTML = "";
+  // Hàm lấy và hiển thị ngân sách từ API
+  async function renderBudgets() {
+    try {
+      // Giả sử API của bạn là /api/budgets
+      const response = await fetch('/api/budgets');
+      budgets = await response.json();
 
-    if (budgets.length === 0) {
-      budgetList.innerHTML = `<p class="text-center text-muted">Chưa có ngân sách nào được thêm.</p>`;
-      return;
+      budgetList.innerHTML = "";
+      if (budgets.length === 0) {
+        budgetList.innerHTML = `<p class="text-center text-muted">Chưa có ngân sách nào.</p>`;
+        return;
+      }
+
+      budgets.forEach((budget, index) => {
+        const card = document.createElement("div");
+        card.className = "col-md-4";
+        card.innerHTML = `
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">${budget.name}</h5>
+                            <p class="card-text">Số tiền: ${budget.amount.toLocaleString()} VND</p>
+                            <button class="btn btn-primary btn-sm edit-btn" data-index="${index}">Sửa</button>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${budget.id}">Xóa</button>
+                        </div>
+                    </div>`;
+        budgetList.appendChild(card);
+      });
+      attachEvents();
+    } catch (error) {
+      budgetList.innerHTML = `<p class="text-center text-danger">Lỗi tải dữ liệu.</p>`;
     }
-
-    budgets.forEach((budget, index) => {
-      const card = document.createElement("div");
-      card.className = "col-md-4";
-
-      card.innerHTML = `
-        <div class="card shadow-sm border-0 rounded-4">
-          <div class="card-body">
-            <h5 class="card-title text-primary">${budget.name}</h5>
-            <p class="card-text mb-1"><strong>Số tiền:</strong> ${budget.amount.toLocaleString()} VND</p>
-            <p class="card-text mb-1"><strong>Chu kỳ:</strong> ${budget.period}</p>
-            <p class="card-text mb-1"><strong>Bắt đầu:</strong> ${budget.startDate}</p>
-            ${budget.note ? `<p class="card-text"><em>${budget.note}</em></p>` : ""}
-            <div class="d-flex justify-content-between mt-3">
-              <button class="btn btn-outline-primary btn-sm edit-btn" data-index="${index}">Chỉnh sửa</button>
-              <button class="btn btn-outline-danger btn-sm delete-btn" data-index="${index}">Xóa</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      budgetList.appendChild(card);
-    });
-
-    attachEvents();
   }
 
   function attachEvents() {
-    // Nút xóa
+    // Sự kiện Xóa
     document.querySelectorAll(".delete-btn").forEach(btn => {
-      btn.addEventListener("click", function() {
-        const idx = this.getAttribute("data-index");
-        if (confirm("Bạn có chắc muốn xóa ngân sách này không?")) {
-          budgets.splice(idx, 1);
-          localStorage.setItem("budgets", JSON.stringify(budgets));
-          renderBudgets();
+      btn.addEventListener("click", async function () {
+        const budgetId = this.dataset.id;
+        if (confirm("Bạn chắc chắn muốn xóa?")) {
+          await fetch(`/api/budgets/${budgetId}`, { method: 'DELETE' });
+          renderBudgets(); // Tải lại danh sách
         }
       });
     });
 
-    // Nút chỉnh sửa
+    // Sự kiện Sửa
     document.querySelectorAll(".edit-btn").forEach(btn => {
-      btn.addEventListener("click", function() {
-        const idx = this.getAttribute("data-index");
-        const budget = budgets[idx];
-
-        document.getElementById("editIndex").value = idx;
+      btn.addEventListener("click", function () {
+        const index = this.dataset.index;
+        const budget = budgets[index];
+        document.getElementById("editIndex").value = budget.id;
         document.getElementById("editName").value = budget.name;
         document.getElementById("editAmount").value = budget.amount;
-        document.getElementById("editPeriod").value = budget.period;
-        document.getElementById("editStartDate").value = budget.startDate;
-        document.getElementById("editNote").value = budget.note || "";
-
+        //... điền các trường khác vào form
         editModal.show();
       });
     });
   }
 
-  // Lưu thay đổi khi chỉnh sửa
-  editForm.addEventListener("submit", function(e) {
+  // Sự kiện submit form chỉnh sửa
+  editForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-
-    const idx = document.getElementById("editIndex").value;
-    budgets[idx] = {
+    const budgetId = document.getElementById("editIndex").value;
+    const updatedData = {
       name: document.getElementById("editName").value,
       amount: parseFloat(document.getElementById("editAmount").value),
-      period: document.getElementById("editPeriod").value,
-      startDate: document.getElementById("editStartDate").value,
-      note: document.getElementById("editNote").value
+      //... lấy dữ liệu các trường khác
     };
 
-    localStorage.setItem("budgets", JSON.stringify(budgets));
+    await fetch(`/api/budgets/${budgetId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedData)
+    });
+
     editModal.hide();
-    renderBudgets();
+    renderBudgets(); // Tải lại
   });
 
   renderBudgets();
