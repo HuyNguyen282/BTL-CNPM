@@ -1,23 +1,28 @@
 {
   "name": "nodebasic",
   "version": "1.0.0",
+  "description": "Node.js + Express + Babel + EJS setup",
+  "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "type": "module",
+    "dev": "npx kill-port 2000 && nodemon --exec \"npx babel-node\" src/server.js",
     "start": "nodemon --exec \"npx babel-node\" src/server.js"
   },
   "dependencies": {
-    "@babel/core": "7.15.5",
-    "@babel/node": "7.15.4",
-    "@babel/preset-env": "7.15.6",
+    "@babel/core": "^7.25.0",
+    "@babel/node": "^7.25.0",
+    "@babel/preset-env": "^7.25.0",
     "bcrypt": "^6.0.0",
-    "body-parser": "1.19.0",
+    "body-parser": "^1.20.3",
     "dotenv": "^17.2.2",
     "ejs": "^3.1.10",
     "express": "^4.18.2",
     "express-session": "^1.18.2",
     "mysql2": "^3.15.1",
     "nodemailer": "^7.0.6",
-    "nodemon": "2.0.12"
+    "nodemon": "^3.1.7"
+  },
+  "devDependencies": {
+    "kill-port": "^2.0.1"
   }
 }

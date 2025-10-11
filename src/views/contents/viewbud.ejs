@@ -38,9 +38,13 @@
         <div class="profile-top">
           <img src="https://i.pravatar.cc/300" alt="Avatar small">
           <div class="meta">
-            <div class="name" id="menuName">Nguyễn Huy</div>
-            <div class="small" id="menuEmail">nguyen.huy@example.com</div>
-            <div class="money" id="money">Số dư:</div>
+            <div class="name" id="menuName">
+              <%= user_details.username %>
+            </div>
+            <div class="small" id="menuEmail">
+              <%= user_details.email %>
+            </div>
+            <div class="money" id="money">Số dư: 27.112.004đ</div>
           </div>
         </div>
         <div class="profile-actions">
@@ -88,41 +92,56 @@
 
     <div id="main-content" class="content flex-grow-1 p-4">
       <div class="container py-5">
-        <h3 class="text-center mb-4">Danh sách ngân sách</h3>
+        <h2 class="mb-4 text-center" style="color:black">Danh sách ngân sách</h2>
+        <div class="row" id="budgetList">
 
-        <div id="budgetList" class="row g-3">
           <% if (locals.budgets && budgets.length> 0) { %>
             <% budgets.forEach(budget=> { %>
-              <div class="col-md-4">
-                <div class="card shadow-sm border-0 rounded-4">
-                  <div class="card-body">
+              <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 rounded-4 h-100">
+                  <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-primary">
-                      <%= budget.name %>
+                      <%= budget.budget_name %>
                     </h5>
-                    <p class="card-text mb-1"><strong>Số tiền:</strong>
-                      <%= budget.amount.toLocaleString() %> VND
+                    <p class="card-text mb-1">
+                      <strong>Số tiền:</strong>
+                      <%= budget.amount.toLocaleString('vi-VN') %> VND
                     </p>
-                    <p class="card-text mb-1"><strong>Chu kỳ:</strong>
-                      <%= budget.period %>
+                    <p class="card-text mb-1">
+                      <strong>Từ:</strong>
+                      <%= new Date(budget.start_date).toLocaleDateString('vi-VN') %>
                     </p>
-                    <p class="card-text mb-1"><strong>Bắt đầu:</strong>
-                      <%= budget.startDate %>
+                    <p class="card-text mb-1">
+                      <strong>Đến:</strong>
+                      <%= new Date(budget.end_date).toLocaleDateString('vi-VN') %>
                     </p>
-                    <div class="d-flex justify-content-between mt-3">
+                    <p>
+                      <strong>Ghi chú:</strong>
+                      <%= budget.note || "Không có" %>
+                    </p>
+                    <div class="d-flex justify-content-between mt-auto pt-3">
                       <button class="btn btn-outline-primary btn-sm edit-btn" data-bs-toggle="modal"
-                        data-bs-target="#editModal" data-id="<%= budget.id %>" data-name="<%= budget.name %>"
-                        data-amount="<%= budget.amount %>" data-period="<%= budget.period %>"
-                        data-start-date="<%= budget.startDate %>">
+                        data-bs-target="#editModal" data-id="<%= budget.budget_id %>"
+                        data-name="<%= budget.budget_name %>" data-amount="<%= budget.amount %>"
+                        data-period="<%= budget.period %>"
+                        data-start-date="<%= budget.start_date.toISOString().split('T')[0] %>"
+                        data-end-date="<%= budget.end_date.toISOString().split('T')[0] %>"
+                        data-note="<%= budget.note %>">
                         Chỉnh sửa
                       </button>
-                      <button class="btn btn-outline-danger btn-sm delete-btn" data-id="<%= budget.id %>">Xóa</button>
+
+                      <form class="d-inline" action="/trang_chu/viewbud/xoa" method="POST"
+                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa ngân sách này không?');">
+                        <input type="hidden" name="budget_id" value="<%= budget.budget_id %>">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                      </form>
                     </div>
                   </div>
                 </div>
               </div>
               <% }); %>
                 <% } else { %>
-                  <p class="text-center text-muted col-12">Chưa có ngân sách nào.</p>
+                  <p class="text-center text-muted col-12">Bạn chưa tạo ngân sách nào.</p>
                   <% } %>
         </div>
 
@@ -139,32 +158,27 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-              <form id="editForm">
-                <input type="hidden" id="editIndex">
+              <form id="editForm" action="/trang_chu/viewbud/chinhsua" method="POST">
+                <input type="hidden" id="editId" name="budget_id">
                 <div class="mb-3">
-                  <label class="form-label">Tên ngân sách</label>
-                  <input type="text" class="form-control" id="editName" required>
+                  <label class="form-label" style="color:black">Tên ngân sách</label>
+                  <input type="text" class="form-control" id="editName" name="budget_name" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Số tiền</label>
-                  <input type="number" class="form-control" id="editAmount" required>
+                  <label class="form-label" style="color:black">Số tiền</label>
+                  <input type="number" class="form-control" id="editAmount" name="amount" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Chu kỳ</label>
-                  <select class="form-select" id="editPeriod">
-                    <option value="monthly">Hàng tháng</option>
-                    <option value="weekly">Hàng tuần</option>
-                    <option value="yearly">Hàng năm</option>
-                    <option value="custom">Khác</option>
-                  </select>
+                  <label class="form-label" style="color:black">Ngày bắt đầu</label>
+                  <input type="date" class="form-control" id="editStartDate" name="start_date" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Ngày bắt đầu</label>
-                  <input type="date" class="form-control" id="editStartDate" required>
+                  <label class="form-label" style="color:black">Ngày kết thúc</label>
+                  <input type="date" class="form-control" id="editEndDate" name="end_date" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Ghi chú</label>
-                  <textarea class="form-control" id="editNote" rows="2"></textarea>
+                  <label class="form-label" style="color:black">Ghi chú</label>
+                  <textarea class="form-control" id="editNote" name="note" rows="2"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Lưu thay đổi</button>
               </form>
@@ -172,7 +186,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 

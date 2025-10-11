@@ -38,9 +38,13 @@
         <div class="profile-top">
           <img src="https://i.pravatar.cc/300" alt="Avatar small">
           <div class="meta">
-            <div class="name" id="menuName">Nguyễn Huy</div>
-            <div class="small" id="menuEmail">nguyen.huy@example.com</div>
-            <div class="money" id="money">Số dư:</div>
+            <div class="name" id="menuName">
+              <%=user_details.username%>
+            </div>
+            <div class="small" id="menuEmail">
+              <%=user_details.email%>
+            </div>
+            <div class="money" id="money">Số dư: 27.112.004đ</div>
           </div>
         </div>
         <div class="profile-actions">
@@ -96,9 +100,11 @@
           <div class="col-md-4">
             <div class="card text-center shadow-sm">
               <div class="card-body">
-                <h5 class="card-title">Tổng chi tiêu tháng</h5>
-                <p id="total-spending" class="display-6 text-primary">
-                  <%%= totalSpending %>₫
+                <h5 class="card-title">Thu nhập / Chi tiêu tháng</h5>
+                <p id="total-spending" class="display-6">
+                  <span class="text-success">+<%= total_income.toLocaleString() || 0 %>₫</span>
+                  &nbsp;/&nbsp;
+                  <span class="text-danger">-<%= total_expense.toLocaleString() || 0 %>₫</span>
                 </p>
               </div>
             </div>
@@ -108,7 +114,9 @@
             <div class="card text-center shadow-sm">
               <div class="card-body">
                 <h5 class="card-title">Số hạng mục</h5>
-                <p id="total-categories" class="display-6 text-success">0</p>
+                <p id="total-categories" class="display-6 text-success">
+                  <%= category_count || 0 %>
+                </p>
               </div>
             </div>
           </div>
@@ -117,7 +125,9 @@
             <div class="card text-center shadow-sm">
               <div class="card-body">
                 <h5 class="card-title">Danh mục chi tiêu lớn nhất</h5>
-                <p id="top-category" class="fs-4 text-danger">Chưa có</p>
+                <p id="top-category" class="fs-4 text-danger">
+                  <%= top_category || 'Chưa có' %>
+                </p>
               </div>
             </div>
           </div>

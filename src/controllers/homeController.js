@@ -29,7 +29,7 @@ export const handleSignUp = async (req, res) => {
         let id = getRandomIntInclusive(100000, 999999);
         const hashedPassword = await bcrypt.hash(password, 10);
         await pool.query(
-            "INSERT INTO users (id, username, password, email) VALUES (?, ?, ?, ?)",
+            "INSERT INTO user (id, username, password, email) VALUES (?, ?, ?, ?)",
             [id, username, hashedPassword, email]
         );
         return res.redirect("/");
@@ -48,7 +48,7 @@ export const handleLogin = async (req, res) => {
         const { username, password } = req.body;
 
         const [rows] = await pool.query(
-            "SELECT * FROM users WHERE username = ? OR email = ?",
+            "SELECT * FROM user WHERE username = ? OR email = ?",
             [username, username]
         );
 
@@ -78,7 +78,7 @@ export const handleSendMail = async (req, res) => {
     try {
         const { email } = req.body;
 
-        const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+        const [rows] = await pool.query("SELECT * FROM user WHERE email = ?", [email]);
         if (rows.length === 0) {
             return res.status(400).send("<script>alert('Email không tồn tại!'); window.history.back();</script>");
         }
@@ -87,7 +87,7 @@ export const handleSendMail = async (req, res) => {
         const expire = new Date(Date.now() + 5 * 60 * 1000);
 
         await pool.query(
-            "UPDATE users SET reset_token = ?, reset_token_expire = ? WHERE email = ?",
+            "UPDATE user SET reset_token = ?, reset_token_expire = ? WHERE email = ?",
             [token, expire, email]
         );
 
@@ -135,7 +135,7 @@ export const handleResetPasswordRequest = async (req, res) => {
         }
 
         const [rows] = await pool.query(
-            "SELECT * FROM users WHERE email = ? AND reset_token = ?",
+            "SELECT * FROM user WHERE email = ? AND reset_token = ?",
             [email, token]
         );
 
@@ -150,7 +150,7 @@ export const handleResetPasswordRequest = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         await pool.query(
-            "UPDATE users SET password = ?, reset_token = NULL, reset_token_expire = NULL WHERE email = ?",
+            "UPDATE user SET password = ?, reset_token = NULL, reset_token_expire = NULL WHERE email = ?",
             [hashedPassword, email]
         );
 
@@ -173,39 +173,52 @@ export const trang_chu = async (req, res) => {
         if (!req.session.user) {
             return res.redirect("/");
         }
-
-        const username = req.session.user.username;
+        const { totalMonthExpense, totalMonthIncome } = req.query;
         const user_id = req.session.user.id;
 
-        const [statRows] = await pool.query(
-            "SELECT total_expense FROM statistics WHERE user_id = ?",
-            [user_id]
-        );
+        //Tổng thu nhập - chi tiêu tháng hiện tại
+        const [rows] = await pool.query(`
+        SELECT 
+        SUM(CASE WHEN c.type = 'income' THEN t.amount ELSE 0 END) AS total_income,
+        SUM(CASE WHEN c.type = 'expense' THEN t.amount ELSE 0 END) AS total_expense
+        FROM transactions t
+        JOIN categories c ON t.category_id = c.category_id
+        WHERE 
+        t.user_id = ? 
+        AND MONTH(t.date) = MONTH(CURRENT_DATE())
+        AND YEAR(t.date) = YEAR(CURRENT_DATE())`, [user_id]);
 
-        const total_expense = statRows.length > 0 ? statRows[0].total_expense : 0;
+        //Số hạng mục
+        const [rowsCategory] = await pool.query(`
+            SELECT COUNT(*) AS category_count
+            FROM categories
+            WHERE user_id = ?`, [user_id]);
 
-        const [topCategoryRows] = await pool.query(
-            `
+        //Danh mục chi tiêu lớn nhất
+        const [topCategory] = await pool.query(`
             SELECT 
-                c.category_name 
+            c.name AS category_name,
+            SUM(t.amount) AS total_spent
             FROM transactions t
-            JOIN category c ON t.category_id = c.category_id
-            WHERE t.user_id = ? AND c.type_expense IS NOT NULL AND c.soft_delete = 0
+            JOIN categories c ON t.category_id = c.category_id
+            WHERE 
+            t.user_id = ?
+            AND c.type = 'expense'
+            AND MONTH(t.date) = MONTH(CURRENT_DATE())
+            AND YEAR(t.date) = YEAR(CURRENT_DATE())
             GROUP BY c.category_id
-            ORDER BY SUM(t.amount) DESC
-            LIMIT 1
-            `,
-            [user_id]
-        );
+            ORDER BY total_spent DESC
+            LIMIT 1`, [user_id]);
 
-        const topCategoryName = topCategoryRows.length > 0 ? topCategoryRows[0].category_name : "Chưa có";
+        //Thông tin user
+        const [userDetails] = await pool.query("SELECT username, email from user where id = ?", [user_id]);
+        const user_details = userDetails[0];
 
-        const userData = {
-            total: total_expense || "Chưa có",
-            topCategory: topCategoryName || "Chưa có",
-        };
-
-        return res.render("contents/trang_chu.ejs", { user: userData });
+        const total_income = rows[0]?.total_income || 0;
+        const total_expense = rows[0]?.total_expense || 0;
+        const category_count = rowsCategory[0]?.category_count || 0;
+        const top_category = topCategory[0]?.category_name || "Chưa có";
+        return res.render("contents/trang_chu.ejs", { total_income, total_expense, category_count, top_category, user_details });
 
     } catch (err) {
         console.error("Lỗi khi load trang_chu:", err);
@@ -214,15 +227,128 @@ export const trang_chu = async (req, res) => {
 };
 
 export const budgetPage = async (req, res) => {
-    res.render("contents/Budget.ejs");
+    try {
+        if (!req.session.user) {
+            return res.redirect("/");
+        }
+        const user_id = req.session.user.id;
+
+        //Thông tin user
+        const [userDetails] = await pool.query("SELECT username, email from user where id = ?", [user_id]);
+        const user_details = userDetails[0];
+
+        res.render("contents/Budget.ejs", { user_details });
+
+    } catch (err) {
+        console.error("Lỗi khi load trang_chu:", err);
+        return res.status(500).send("Lỗi server khi tải trang chủ");
+    }
+
 };
 
+export const handlebudgetPage = async (req, res) => {
+    const { budgetName, amount, startDate, endDate, note } = req.body;
+    const user_id = req.session.user.id;
+    const [userDetails] = await pool.query("SELECT username, email from user where id = ?", [user_id]);
+    const user_details = userDetails[0];
+    await pool.query("INSERT INTO budgets (user_id, budget_name, amount, start_date, end_date, note) VALUES (?, ?, ?, ?, ?, ?)",
+        [user_id, budgetName, amount, startDate, endDate, note]);
+    res.redirect("/trang_chu/viewbud");
+};
+
+
 export const viewbudPage = async (req, res) => {
-    res.render("contents/viewbud.ejs");
+    try {
+        if (!req.session.user) {
+            return res.redirect("/");
+        }
+
+        const user_id = req.session.user.id;
+
+        const [userDetails] = await pool.query(
+            "SELECT username, email FROM user WHERE id = ?",
+            [user_id]
+        );
+        const user_details = userDetails[0] || {};
+
+        const [budgets] = await pool.query(
+            "SELECT * FROM budgets WHERE user_id = ?",
+            [user_id]
+        );
+
+        res.render("contents/viewbud.ejs", {
+            user_details,
+            budgets,
+        });
+
+    } catch (err) {
+        console.error("Lỗi khi tải trang viewbud:", err);
+        res.status(500).send("Lỗi server khi tải trang hạn mức");
+    }
+};
+
+export const updateBudget = async (req, res) => {
+    try {
+        const budgetId = req.body.budget_id;
+        const userId = req.session.user.id;
+
+        const { budget_name, amount, start_date, end_date, note } = req.body;
+
+        await pool.query(
+            "UPDATE budgets SET budget_name = ?, amount = ?, start_date = ?, end_date = ?, note = ? WHERE budget_id = ? AND user_id = ?",
+            [budget_name, amount, start_date, end_date, note, budgetId, userId]
+        );
+
+
+        res.redirect("/trang_chu/viewbud");
+
+    } catch (error) {
+        console.error("Lỗi khi cập nhật budget:", error);
+        res.status(500).send("Lỗi server khi cập nhật budget");
+    }
+};
+
+export const deleteBudget = async (req, res) => {
+    try {
+
+        const budgetId = req.body.budget_id;
+        const userId = req.session.user.id;
+
+        await pool.query(
+            "DELETE FROM budgets WHERE budget_id = ? AND user_id = ?",
+            [budgetId, userId]
+        );
+
+        res.redirect("/trang_chu/viewbud");
+
+    } catch (error) {
+        console.error("Lỗi khi xóa budget:", error);
+        res.status(500).send("Lỗi server khi xóa budget");
+    }
 };
 
 export const themchitieuPage = async (req, res) => {
-    res.render("contents/themchitieu.ejs");
+    try {
+        if (!req.session.user) {
+            return res.redirect("/");
+        }
+
+        const user_id = req.session.user.id;
+
+        const [userDetails] = await pool.query(
+            "SELECT username, email FROM user WHERE id = ?",
+            [user_id]
+        );
+        const user_details = userDetails[0] || {};
+
+        res.render("contents/themchitieu.ejs", {
+            user_details
+        });
+
+    } catch (err) {
+        console.error("Lỗi khi tải trang viewbud:", err);
+        res.status(500).send("Lỗi server khi tải trang hạn mức");
+    }
 };
 
 export const chinhsuachitieuPage = async (req, res) => {
