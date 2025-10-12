@@ -44,7 +44,7 @@
             <div class="small" id="menuEmail">
               <%=user_details.email%>
             </div>
-            <div class="money" id="money">Số dư: 27.112.004đ</div>
+            <div class="money" id="money">Số dư: <%= balance.toLocaleString() %>đ</div>
           </div>
         </div>
         <div class="profile-actions">
@@ -81,7 +81,7 @@
         </a>
         <div class="submenu" style="display: none; padding-left: 20px;">
           <a href="/trang_chu/themchitieu" class="chat-item" data-file="themchitieu.html">➕ Thêm chi tiêu</a>
-          <a href="/trang_chu/chinhsuachitieu" class="chat-item" data-file="chinhsuakhoanchi.html">✏️ Chỉnh sửa khoản
+          <a href="/trang_chu/chinhsuachitieu" class="chat-item" data-file="chinhsuachitieu.html">✏️ Chỉnh sửa khoản
             chi</a>
         </div>
         <a href="bieudo.html" class="chat-item" data-file="bieudo.html">
@@ -94,13 +94,14 @@
     </div>
     <div id="main-content" class="content flex-grow-1 p-3">
       <div class="container mt-5">
-        <h2 class="text-center mb-4">Tổng quan chi tiêu</h2>
+        <h2 class="text-center mb-4" style="color: black">Tổng quan chi tiêu</h2>
 
         <div class="row g-4">
           <div class="col-md-4">
             <div class="card text-center shadow-sm">
               <div class="card-body">
-                <h5 class="card-title">Thu nhập / Chi tiêu tháng</h5>
+                <h5 class="card-title">Thu nhập / Chi tiêu tháng <%= month %>
+                </h5>
                 <p id="total-spending" class="display-6">
                   <span class="text-success">+<%= total_income.toLocaleString() || 0 %>₫</span>
                   &nbsp;/&nbsp;

@@ -170,61 +170,79 @@ export const handleLogout = (req, res) => {
 
 export const trang_chu = async (req, res) => {
     try {
-        if (!req.session.user) {
-            return res.redirect("/");
-        }
-        const { totalMonthExpense, totalMonthIncome } = req.query;
+        if (!req.session.user) return res.redirect("/");
+
         const user_id = req.session.user.id;
 
-        //Tổng thu nhập - chi tiêu tháng hiện tại
+        // Tổng thu nhập - chi tiêu tháng hiện tại
         const [rows] = await pool.query(`
-        SELECT 
-        SUM(CASE WHEN c.type = 'income' THEN t.amount ELSE 0 END) AS total_income,
-        SUM(CASE WHEN c.type = 'expense' THEN t.amount ELSE 0 END) AS total_expense
-        FROM transactions t
-        JOIN categories c ON t.category_id = c.category_id
-        WHERE 
-        t.user_id = ? 
-        AND MONTH(t.date) = MONTH(CURRENT_DATE())
-        AND YEAR(t.date) = YEAR(CURRENT_DATE())`, [user_id]);
-
-        //Số hạng mục
-        const [rowsCategory] = await pool.query(`
-            SELECT COUNT(*) AS category_count
-            FROM categories
-            WHERE user_id = ?`, [user_id]);
-
-        //Danh mục chi tiêu lớn nhất
-        const [topCategory] = await pool.query(`
             SELECT 
-            c.name AS category_name,
-            SUM(t.amount) AS total_spent
+                SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END) AS total_income,
+                SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END) AS total_expense
             FROM transactions t
-            JOIN categories c ON t.category_id = c.category_id
-            WHERE 
-            t.user_id = ?
-            AND c.type = 'expense'
+            WHERE t.user_id = ?
             AND MONTH(t.date) = MONTH(CURRENT_DATE())
             AND YEAR(t.date) = YEAR(CURRENT_DATE())
-            GROUP BY c.category_id
-            ORDER BY total_spent DESC
-            LIMIT 1`, [user_id]);
+        `, [user_id]);
 
-        //Thông tin user
-        const [userDetails] = await pool.query("SELECT username, email from user where id = ?", [user_id]);
-        const user_details = userDetails[0];
+        const [currentMonth] = await pool.query("SELECT MONTH(CURRENT_DATE()) AS month");
 
+        const month = currentMonth[0].month;
         const total_income = rows[0]?.total_income || 0;
         const total_expense = rows[0]?.total_expense || 0;
-        const category_count = rowsCategory[0]?.category_count || 0;
-        const top_category = topCategory[0]?.category_name || "Chưa có";
-        return res.render("contents/trang_chu.ejs", { total_income, total_expense, category_count, top_category, user_details });
+
+        // Số hạng mục (dùng budgets)
+        const [rowsBudget] = await pool.query(`
+            SELECT COUNT(*) AS budget_count
+            FROM budgets
+            WHERE user_id = ?
+        `, [user_id]);
+
+        const category_count = rowsBudget[0]?.budget_count || 0;
+
+        // Hạng mục chi tiêu lớn nhất
+        const [topBudget] = await pool.query(`
+            SELECT b.budget_name AS category_name, SUM(t.amount) AS total_spent
+            FROM transactions t
+            JOIN budgets b ON t.budget_id = b.budget_id
+            WHERE t.user_id = ? AND t.type = 'expense'
+            AND MONTH(t.date) = MONTH(CURRENT_DATE())
+            AND YEAR(t.date) = YEAR(CURRENT_DATE())
+            GROUP BY b.budget_id
+            ORDER BY total_spent DESC
+            LIMIT 1
+        `, [user_id]);
+
+        const top_category = topBudget[0]?.category_name || "Chưa có";
+
+        // Thông tin user
+        const [userDetails] = await pool.query(
+            "SELECT username, email FROM user WHERE id = ?",
+            [user_id]
+        );
+        const [balanceTotal] = await pool.query(
+            "SELECT SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) - SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS balance FROM transactions WHERE user_id = ?",
+            [user_id]
+        );
+        const user_details = userDetails[0];
+        const balance = balanceTotal[0].balance || 0;
+
+        return res.render("contents/trang_chu.ejs", {
+            total_income,
+            total_expense,
+            category_count,
+            top_category,
+            user_details,
+            month,
+            balance
+        });
 
     } catch (err) {
         console.error("Lỗi khi load trang_chu:", err);
         return res.status(500).send("Lỗi server khi tải trang chủ");
     }
 };
+
 
 export const budgetPage = async (req, res) => {
     try {
@@ -236,8 +254,16 @@ export const budgetPage = async (req, res) => {
         //Thông tin user
         const [userDetails] = await pool.query("SELECT username, email from user where id = ?", [user_id]);
         const user_details = userDetails[0];
-
-        res.render("contents/Budget.ejs", { user_details });
+        const [balanceTotal] = await pool.query(
+            `SELECT 
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) -
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS balance
+            FROM transactions 
+            WHERE user_id = ?`,
+            [user_id]
+        );
+        const balance = balanceTotal[0]?.balance || 0;
+        res.render("contents/Budget.ejs", { user_details, balance });
 
     } catch (err) {
         console.error("Lỗi khi load trang_chu:", err);
@@ -255,7 +281,6 @@ export const handlebudgetPage = async (req, res) => {
         [user_id, budgetName, amount, startDate, endDate, note]);
     res.redirect("/trang_chu/viewbud");
 };
-
 
 export const viewbudPage = async (req, res) => {
     try {
@@ -275,10 +300,19 @@ export const viewbudPage = async (req, res) => {
             "SELECT * FROM budgets WHERE user_id = ?",
             [user_id]
         );
-
+        const [balanceTotal] = await pool.query(
+            `SELECT 
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) -
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS balance
+            FROM transactions 
+            WHERE user_id = ?`,
+            [user_id]
+        );
+        const balance = balanceTotal[0]?.balance || 0;
         res.render("contents/viewbud.ejs", {
             user_details,
             budgets,
+            balance
         });
 
     } catch (err) {
@@ -334,23 +368,170 @@ export const themchitieuPage = async (req, res) => {
         }
 
         const user_id = req.session.user.id;
-
         const [userDetails] = await pool.query(
             "SELECT username, email FROM user WHERE id = ?",
             [user_id]
         );
         const user_details = userDetails[0] || {};
 
+        const [budgets] = await pool.query(
+            "SELECT budget_id, budget_name FROM budgets WHERE user_id = ?",
+            [user_id]
+        );
+        const [balanceTotal] = await pool.query(
+            `SELECT 
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) -
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS balance
+            FROM transactions 
+            WHERE user_id = ?`,
+            [user_id]
+        );
+        const balance = balanceTotal[0]?.balance || 0;
         res.render("contents/themchitieu.ejs", {
-            user_details
+            user_details, budgets, balance
         });
 
     } catch (err) {
-        console.error("Lỗi khi tải trang viewbud:", err);
-        res.status(500).send("Lỗi server khi tải trang hạn mức");
+        console.error("Lỗi khi tải trang:", err);
+        res.status(500).send("Lỗi server khi tải trang");
+    }
+};
+
+export const handlethemchitieu = async (req, res) => {
+    try {
+        if (!req.session.user) return res.redirect("/");
+
+        const user_id = req.session.user.id;
+        const { transaction_name, amount, date, note, type, budget_id } = req.body;
+
+        const [budgets] = await pool.query(
+            "SELECT budget_id, budget_name FROM budgets WHERE user_id = ?", [user_id]
+        );
+
+        if (budgets.length === 0) {
+            return res.status(400).send("<script>alert('Vui lòng tạo hạng mục ngân sách trước!'); window.history.back();</script>");
+        }
+
+        await pool.query(
+            "INSERT INTO transactions (transaction_name, amount, date, note, user_id, type, budget_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [transaction_name, amount, date, note, user_id, type, budget_id || null]
+        );
+
+        res.redirect("/trang_chu/themchitieu");
+    } catch (err) {
+        console.error("Lỗi khi thêm chi tiêu:", err);
+        res.status(500).send("Lỗi server khi thêm chi tiêu");
     }
 };
 
 export const chinhsuachitieuPage = async (req, res) => {
-    res.render("contents/chinhsuakhoanchi.ejs");
+    try {
+        if (!req.session.user) {
+            return res.redirect("/");
+        }
+
+        const user_id = req.session.user.id;
+
+        // Thông tin user
+        const [userDetails] = await pool.query(
+            "SELECT username, email FROM user WHERE id = ?",
+            [user_id]
+        );
+
+        // Tính tổng số dư
+        const [balanceTotal] = await pool.query(
+            `SELECT 
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) -
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS balance
+            FROM transactions 
+            WHERE user_id = ?`,
+            [user_id]
+        );
+        const balance = balanceTotal[0]?.balance || 0;
+        // Danh sách giao dịch
+        const [transactions] = await pool.query(
+            "SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC",
+            [user_id]
+        );
+
+        const user_details = userDetails[0];
+
+
+        res.render("contents/chinhsuachitieu.ejs", {
+            user_details,
+            balance,
+            transactions
+        });
+
+    } catch (err) {
+        console.error("Lỗi khi load trang chỉnh sửa chi tiêu:", err);
+        res.status(500).send("Lỗi server khi tải trang chỉnh sửa chi tiêu");
+    }
+};
+
+export const chinhsuakhoanchi = async (req, res) => {
+    try {
+        if (!req.session.user) return res.redirect("/");
+
+        const user_id = req.session.user.id;
+        const { transaction_id, transaction_name, amount, date, note, type } = req.body;
+
+        if (!transaction_id || !transaction_name || !amount || !date || !type) {
+            return res.status(400).send("<script>alert('Vui lòng nhập đầy đủ thông tin!'); window.history.back();</script>");
+        }
+
+        const [checkTrans] = await pool.query(
+            "SELECT * FROM transactions WHERE transaction_id = ? AND user_id = ?",
+            [transaction_id, user_id]
+        );
+
+        if (checkTrans.length === 0) {
+            return res.status(404).send("<script>alert('Không tìm thấy giao dịch!'); window.history.back();</script>");
+        }
+
+
+        await pool.query(
+            `UPDATE transactions 
+             SET transaction_name = ?, amount = ?, date = ?, note = ?, type = ?
+             WHERE transaction_id = ? AND user_id = ?`,
+            [transaction_name, amount, date, note, type, transaction_id, user_id]
+        );
+
+        res.redirect("/trang_chu/chinhsuachitieu");
+    } catch (err) {
+        console.error("Lỗi khi chỉnh sửa chi tiêu:", err);
+        res.status(500).send("Lỗi server khi chỉnh sửa chi tiêu");
+    }
+};
+
+export const xoakhoanchi = async (req, res) => {
+    try {
+        if (!req.session.user) return res.redirect("/");
+
+        const user_id = req.session.user.id;
+        const { transaction_id } = req.body;
+
+        if (!transaction_id) {
+            return res.status(400).send("<script>alert('Thiếu ID giao dịch!'); window.history.back();</script>");
+        }
+
+        const [checkTrans] = await pool.query(
+            "SELECT * FROM transactions WHERE transaction_id = ? AND user_id = ?",
+            [transaction_id, user_id]
+        );
+
+        if (checkTrans.length === 0) {
+            return res.status(404).send("<script>alert('Không tìm thấy giao dịch!'); window.history.back();</script>");
+        }
+
+        await pool.query(
+            "DELETE FROM transactions WHERE transaction_id = ? AND user_id = ?",
+            [transaction_id, user_id]
+        );
+
+        res.redirect("/trang_chu/chinhsuachitieu");
+    } catch (err) {
+        console.error("Lỗi khi xoá chi tiêu:", err);
+        res.status(500).send("Lỗi server khi xoá chi tiêu");
+    }
 };
