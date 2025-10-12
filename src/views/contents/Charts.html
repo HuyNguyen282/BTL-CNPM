@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thêm khoản chi - EggHead</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="/src/public/css/main.css">
+</head>
+
+<body class="bg-light">
+  <nav class="navbar navbar-expand-lg navbar-light bg-gradient px-3 custom-navbar align-items-center">
+    <img src="/img/552783237_1095201732776549_4395309577322638889_n.svg" alt="logo" width="100" height="80">
+    <a class="navbar-brand" href="/trang_chu/dashboard">EggHead</a>
+
+    <div class="position-relative ms-auto d-flex align-items-center me-3">
+      <button id="bellBtn" class="btn btn-sm btn-outline-secondary position-relative me-2 btn-notify bell-custom"
+        aria-label="Thông báo">
+        <i class="fa-solid fa-bell"></i>
+        <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+          id="notifyCount">0</span>
+      </button>
+      <div id="notificationBox" class="d-none position-absolute bg-white shadow p-2"
+        style="top:90%; right:83px; width:280px; z-index:1000;">
+        <h6 class="mb-2">Thông báo</h6>
+        <ul id="notificationList" class="list-unstyled m-0 p-0"></ul>
+      </div>
+    </div>
+
+    <div class="position-relative">
+      <button id="userBtn" class="btn p-0 border-0 bg-transparent" aria-haspopup="true" aria-expanded="false"
+        aria-controls="userMenu">
+        <img src="https://i.pravatar.cc/300" alt="Avatar" class="user-avatar" id="userAvatar">
+      </button>
+
+      <div id="userMenu" class="position-absolute end-0 mt-2 user-dropdown bg-white d-none" role="menu"
+        aria-labelledby="userBtn">
+        <div class="profile-top">
+          <img src="https://i.pravatar.cc/300" alt="Avatar small">
+          <div class="meta">
+            <div class="name" id="menuName">
+              <%= user_details.username %>
+            </div>
+            <div class="small" id="menuEmail">
+              <%= user_details.email %>
+            </div>
+            <div class="money" id="money">Số dư: 27.112.004đ</div>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <a href="#" id="viewProfile" role="menuitem"><i class="fa-regular fa-user"></i> <span>Xem hồ sơ</span></a>
+          <a href="#" id="settings" role="menuitem"><i class="fa-solid fa-gear"></i> <span>Cài đặt</span></a>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" id="logout" role="menuitem" class="text-danger"><i
+              class="fa-solid fa-right-from-bracket"></i> <span>Đăng xuất</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="d-flex">
+    <div class="sidebar d-flex flex-column p-3">
+      <div class="sidebar-header mb-3 d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-black">EggHead</span>
+        <button class="btn btn-sm btn-outline-dark toggle-btn"><i class="fa-solid fa-bars"></i></button>
+      </div>
+
+      <div class="chat-list flex-grow-1 overflow-auto">
+        <a href="/trang_chu/dashboard" class="chat-item">
+          <i class="fa-solid fa-house"></i><span>Trang chủ</span>
+        </a>
+
+        <a href="#" class="chat-item has-submenu">
+          <i class="fa-solid fa-money-bill-wave"></i>
+          <span>Chỉnh sửa ngân sách</span>
+        </a>
+        <div class="submenu" style="display:none; padding-left:20px;">
+          <a href="/trang_chu/Budget" class="chat-item">➕ Thêm ngân sách</a>
+          <a href="/trang_chu/viewbud" class="chat-item">✏️ Chỉnh sửa ngân sách</a>
+        </div>
+
+        <a href="#" class="chat-item has-submenu active">
+          <i class="fa-solid fa-piggy-bank"></i>
+          <span>Chỉnh sửa chi tiêu</span>
+        </a>
+        <div class="submenu" style="display:block; padding-left:20px;">
+          <a href="/trang_chu/themchitieu" class="chat-item active">➕ Thêm chi tiêu</a>
+          <a href="/trang_chu/chinhsuakhoanchi" class="chat-item">✏️ Chỉnh sửa khoản chi</a>
+        </div>
+
+        <a href="/trang" class="chat-item"><i class="fa-solid fa-chart-simple"></i><span>Biểu đồ</span></a>
+        <a href="lichsu.html" class="chat-item"><i class="fa-solid fa-timeline"></i><span>Lịch sử giao dịch</span></a>
+      </div>
+    </div>
+
+    <div id="main-content" class="content flex-grow-1 p-4">
+        <!-- Main Content -->
+        <div class="container-fluid px-4 py-4">
+          <h3 class="fw-bold mb-4">Biểu đồ chi tiêu tổng quát</h3>
+
+          <div class="row g-4">
+            <!-- Biểu đồ cột -->
+            <div class="col-lg-7">
+              <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Chi tiêu theo tháng</h5>
+                  <canvas id="barChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Biểu đồ tròn -->
+            <div class="col-lg-5">
+              <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Tỉ lệ chi tiêu theo danh mục</h5>
+                  <canvas id="pieChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/src/public/js/Charts.js"></script>
+</body>
+
+</html>
