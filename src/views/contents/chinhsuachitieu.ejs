@@ -6,18 +6,22 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Chỉnh sửa khoản chi - EggHead</title>
 
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="/css/main.css">
 </head>
 
 <body class="bg-light">
+
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-gradient px-3 custom-navbar align-items-center">
     <img src="/img/552783237_1095201732776549_4395309577322638889_n.svg" alt="logo" width="100" height="80">
     <a class="navbar-brand" href="/trang_chu/dashboard">EggHead</a>
 
+    <!-- Notification -->
     <div class="position-relative ms-auto d-flex align-items-center me-3">
       <button id="bellBtn" class="btn btn-sm btn-outline-secondary position-relative me-2 btn-notify bell-custom"
         aria-label="Thông báo">
@@ -32,6 +36,7 @@
       </div>
     </div>
 
+    <!-- User menu -->
     <div class="position-relative">
       <button id="userBtn" class="btn p-0 border-0 bg-transparent" aria-haspopup="true" aria-expanded="false"
         aria-controls="userMenu">
@@ -43,22 +48,30 @@
         <div class="profile-top">
           <img src="https://i.pravatar.cc/300" alt="Avatar small">
           <div class="meta">
-            <div class="name" id="menuName">Nguyễn Huy</div>
-            <div class="small" id="menuEmail">nguyen.huy@example.com</div>
-            <div class="money" id="money">Số dư:</div>
+            <div class="name">
+              <%= user_details.username %>
+            </div>
+            <div class="small">
+              <%= user_details.email %>
+            </div>
+            <div class="money">Số dư: <%= balance.toLocaleString() %>đ</div>
           </div>
         </div>
         <div class="profile-actions">
           <a href="#" id="viewProfile" role="menuitem"><i class="fa-regular fa-user"></i> <span>Xem hồ sơ</span></a>
           <a href="#" id="settings" role="menuitem"><i class="fa-solid fa-gear"></i> <span>Cài đặt</span></a>
           <div class="dropdown-divider"></div>
-          <a href="/logout" id="logout" role="menuitem" class="text-danger"><i
-              class="fa-solid fa-right-from-bracket"></i> <span>Đăng xuất</span></a>
+          <a href="/logout" class="text-danger" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i>
+            <span>Đăng
+              xuất</span></a>
         </div>
       </div>
     </div>
   </nav>
+
+  <!-- Main layout -->
   <div class="d-flex">
+    <!-- Sidebar -->
     <div class="sidebar d-flex flex-column p-3">
       <div class="sidebar-header mb-3 d-flex justify-content-between align-items-center">
         <span class="fw-bold text-black">EggHead</span>
@@ -85,7 +98,7 @@
         </a>
         <div class="submenu" style="display:block; padding-left:20px;">
           <a href="/trang_chu/themchitieu" class="chat-item">➕ Thêm chi tiêu</a>
-          <a href="/trang_chu/chinhsuakhoanchi" class="chat-item active">✏️ Chỉnh sửa khoản chi</a>
+          <a href="/trang_chu/chinhsuachitieu" class="chat-item active">✏️ Chỉnh sửa khoản chi</a>
         </div>
 
         <a href="/trang_chu/charts" class="chat-item "><i class="fa-solid fa-chart-simple"></i><span>Biểu đồ</span></a>
@@ -93,11 +106,55 @@
       </div>
     </div>
 
+    <!-- Content -->
     <div id="main-content" class="content flex-grow-1 p-4">
       <div class="container py-5">
-        <h3 class="text-center mb-4">Danh sách khoản chi</h3>
+        <h3 class="text-center mb-4" style="color:black">Danh sách giao dịch</h3>
 
-        <div id="expenseList" class="row g-3">
+        <div id="transactionList" class="row g-3">
+          <% if (transactions && transactions.length> 0) { %>
+            <% transactions.forEach(tran=> { %>
+              <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 rounded-4 h-100">
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title <%= tran.type === 'income' ? 'text-success' : 'text-danger' %>">
+                      <%= tran.transaction_name %>
+                    </h5>
+                    <p><strong>Số tiền:</strong>
+                      <%= tran.amount.toLocaleString('vi-VN') %>đ
+                    </p>
+                    <p><strong>Loại:</strong>
+                      <%= tran.type==='income' ? 'Thu nhập' : 'Chi tiêu' %>
+                    </p>
+                    <p><strong>Ngày:</strong>
+                      <%= new Date(tran.date).toLocaleDateString('vi-VN') %>
+                    </p>
+                    <p><strong>Ghi chú:</strong>
+                      <%= tran.note || "Không có" %>
+                    </p>
+
+                    <div class="d-flex justify-content-between mt-auto pt-3">
+                      <button class="btn btn-outline-primary btn-sm edit-btn" data-bs-toggle="modal"
+                        data-bs-target="#editModal" data-id="<%= tran.transaction_id %>"
+                        data-name="<%= tran.transaction_name %>" data-amount="<%= tran.amount %>"
+                        data-type="<%= tran.type %>" data-date="<%= new Date(tran.date).toISOString().split('T')[0] %>"
+                        data-note="<%= tran.note %>">
+                        Chỉnh sửa
+                      </button>
+
+                      <form class="d-inline" action="/trang_chu/chinhsuachitieu/xoa" method="POST"
+                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa giao dịch này không?');">
+                        <input type="hidden" name="transaction_id" value="<%= tran.transaction_id %>">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+                <% } else { %>
+                  <p class="text-center text-muted">Bạn chưa có giao dịch nào.</p>
+                  <% } %>
         </div>
 
         <div class="text-center mt-4">
@@ -105,44 +162,57 @@
         </div>
       </div>
 
+      <!-- Edit Modal -->
       <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content rounded-4">
             <div class="modal-header">
-              <h5 class="modal-title">Chỉnh sửa khoản chi</h5>
+              <h5 class="modal-title" style="color: black;">Chỉnh sửa khoản chi</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-              <form id="editForm">
-                <input type="hidden" id="editIndex">
+              <form id="editForm" action="/trang_chu/chinhsuachitieu/chinhsua" method="POST">
+                <input type="hidden" name="transaction_id" id="editId">
+
                 <div class="mb-3">
-                  <label class="form-label">Tên khoản chi</label>
-                  <input type="text" class="form-control" id="editName" required>
+                  <label class="form-label" style="color: black;">Tên khoản chi</label>
+                  <input type="text" class="form-control" name="transaction_name" id="editName" required>
                 </div>
+
                 <div class="mb-3">
-                  <label class="form-label">Số tiền</label>
-                  <input type="number" class="form-control" id="editAmount" required>
+                  <label class="form-label" style="color: black;">Số tiền</label>
+                  <input type="number" class="form-control" name="amount" id="editAmount" required>
                 </div>
+
                 <div class="mb-3">
-                  <label class="form-label">Ngày</label>
-                  <input type="date" class="form-control" id="editDate" required>
+                  <label for="editExpenseType" class="form-label" style="color: black;">Loại giao dịch</label>
+                  <select class="form-select" name="type" id="editExpenseType" required>
+                    <option value="expense">Chi tiêu</option>
+                    <option value="income">Thu nhập</option>
+                  </select>
                 </div>
+
                 <div class="mb-3">
-                  <label class="form-label">Ghi chú</label>
-                  <textarea class="form-control" id="editNote" rows="2"></textarea>
+                  <label class="form-label" style="color: black;">Ngày</label>
+                  <input type="date" class="form-control" name="date" id="editDate" required>
                 </div>
+
+                <div class="mb-3">
+                  <label class="form-label" style="color: black;">Ghi chú</label>
+                  <textarea class="form-control" name="note" id="editNote" rows="2"></textarea>
+                </div>
+
                 <button type="submit" class="btn btn-primary w-100">Lưu thay đổi</button>
               </form>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/main.js"></script>
-  <script src="/js/chinhsuakhoanchi.js"></script>
+      <!-- Scripts -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="/js/main.js"></script>
+      <script src="/js/chinhsuakhoanchi.js"></script>
 </body>
 
 </html>

@@ -193,3 +193,35 @@ body {
 .btn-notify:focus {
   box-shadow: 0 0 0 0.2rem rgba(255, 204, 0, 0.4);
 }
+.fw-bold{
+  color:black;
+}
+.card {
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+.card {
+  border-width: 2px;
+  border-radius: 1rem;
+}
+/* LỊCH SỬ GIAO DỊCH */
+#main-content h3 {
+  letter-spacing: 0.5px;
+}
+
+#exportBtn i {
+  font-size: 1rem;
+}
+
+#transactionTable thead th {
+  white-space: nowrap;
+}
+
+#transactionTable tbody tr:hover {
+  background-color: #f7faff;
+  transition: 0.2s ease;
+}

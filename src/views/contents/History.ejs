@@ -10,7 +10,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="/src/public/css/main.css">
+  <link rel="stylesheet" href="/css/main.css">
 </head>
 
 <body class="bg-light">
@@ -49,7 +49,7 @@
             <div class="small" id="menuEmail">
               <%= user_details.email %>
             </div>
-            <div class="money" id="money">Số dư: 27.112.004đ</div>
+            <div class="money" id="money">Số dư: <%= balance.toLocaleString() %>đ</div>
           </div>
         </div>
         <div class="profile-actions">
@@ -109,107 +109,128 @@
           </button>
         </div>
 
-    <div class="row mb-4 g-3 align-items-end">
-      <div class="col-md-4">
-        <label for="fromDate" class="form-label">Từ ngày</label>
-        <input type="date" class="form-control" id="fromDate">
-      </div>
-      <div class="col-md-4">
-        <label for="toDate" class="form-label">Đến ngày</label>
-        <input type="date" class="form-control" id="toDate">
-      </div>
-      <div class="col-md-3">
-        <label for="type" class="form-label">Loại giao dịch</label>
-        <select class="form-select" id="type">
-          <option value="">Tất cả</option>
-          <option value="income">Thu</option>
-          <option value="expense">Chi</option>
-        </select>
-      </div>
-      <div class="col-md-1">
-        <button id="filterBtn" class="btn btn-primary w-100">Lọc</button>
-      </div>
-    </div>
+      <!-- Bộ lọc -->
+      <form id="filterForm" action="/trang_chu/history" method="POST" class="bg-white p-4 rounded-3 shadow-sm mb-4">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="fromDate" class="form-label fw-semibold text-secondary">
+              <i class="fa-regular fa-calendar-days me-1"></i>Từ ngày
+            </label>
+            <input
+              type="date"
+              class="form-control"
+              name="fromDate"
+              value="<%= fromDate || '' %>"
+            >
+          </div>
 
-    <!-- Thống kê tổng -->
-    <div class="row text-center mb-4 g-3">
-      <div class="col-md-4">
-        <div class="card shadow-sm border-success">
-          <div class="card-body">
-            <h6 class="text-success">Tổng thu</h6>
-            <h4 id="totalIncome" class="fw-bold text-success">+ 12,000,000₫</h4>
+          <div class="col-md-4">
+            <label for="toDate" class="form-label fw-semibold text-secondary">
+              <i class="fa-regular fa-calendar-check me-1"></i>Đến ngày
+            </label>
+            <input
+              type="date"
+              class="form-control"
+              name="toDate"
+              value="<%= toDate || '' %>"
+            >
+          </div>
+
+          <div class="col-md-3">
+            <label for="type" class="form-label fw-semibold text-secondary">
+              <i class="fa-solid fa-filter me-1"></i>Loại giao dịch
+            </label>
+            <select class="form-select" name="type">
+              <option value="all" <%= type === 'all' ? 'selected' : '' %>>Tất cả</option>
+              <option value="income" <%= type === 'income' ? 'selected' : '' %>>Thu nhập</option>
+              <option value="expense" <%= type === 'expense' ? 'selected' : '' %>>Chi tiêu</option>
+            </select>
+          </div>
+
+          <div class="col-md-1 d-grid">
+            <button type="submit" class="btn btn-primary fw-semibold">
+              <i class="fa-solid fa-magnifying-glass me-1"></i>Lọc
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Thống kê tổng -->
+      <div class="row text-center mb-4 g-3">
+        <div class="col-md-4">
+          <div class="card shadow-sm border-success">
+            <div class="card-body">
+              <h6 class="text-success">Tổng thu</h6>
+              <h4 id="totalIncome" class="fw-bold text-success">
+                <%= total_income.toLocaleString('vi-VN') %>₫
+              </h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm border-danger">
+            <div class="card-body">
+              <h6 class="text-danger">Tổng chi</h6>
+              <h4 id="totalExpense" class="fw-bold text-danger">
+                <%= total_expense.toLocaleString('vi-VN') %>₫
+              </h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm border-primary">
+            <div class="card-body">
+              <h6 class="text-primary">Số dư còn lại</h6>
+              <h4 id="balance" class="fw-bold text-primary">
+                <%= balance.toLocaleString('vi-VN') %>₫
+              </h4>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="col-md-4">
-        <div class="card shadow-sm border-danger">
-          <div class="card-body">
-            <h6 class="text-danger">Tổng chi</h6>
-            <h4 id="totalExpense" class="fw-bold text-danger">- 8,500,000₫</h4>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="card shadow-sm border-primary">
-          <div class="card-body">
-            <h6 class="text-primary">Số dư còn lại</h6>
-            <h4 id="balance" class="fw-bold text-primary"></h4>
-          </div>
-        </div>
-      </div>
-    </div>
-
-        <!-- Bảng giao dịch -->
-        <div class="table-responsive shadow-sm rounded-3">
-          <table id="transactionTable" class="table table-hover align-middle mb-0">
-            <thead class="table-primary">
-              <tr>
-                <th>#</th>
-                <th>Ngày</th>
-                <th>Mô tả</th>
-                <th>Ngân sách</th>
-                <th>Loại</th>
-                <th>Số tiền</th>
+      <!-- Bảng giao dịch -->
+      <div class="table-responsive shadow-sm rounded-3">
+        <table id="transactionTable" class="table table-hover align-middle mb-0">
+          <thead class="table-primary">
+            <tr>
+              <th>#</th>
+              <th>Ngày</th>
+              <th>Mô tả</th>
+              <th>Ngân sách</th>
+              <th>Loại</th>
+              <th>Số tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% transactions.forEach((t, index) => { %>
+              <tr data-type="<%= t.type %>">
+                <td><%= index + 1 %></td>
+                <td><%= new Date(t.date).toLocaleDateString('vi-VN') %></td>
+                <td><%= t.transaction_name %></td>
+                <td><%= t.budget_id || 'Chưa có' %></td>
+                <td>
+                  <span class="badge <%= t.type === 'income' ? 'bg-success' : 'bg-danger' %>">
+                    <%= t.type === 'income' ? 'Thu' : 'Chi' %>
+                  </span>
+                </td>
+                <td class="<%= t.type === 'income' ? 'text-success' : 'text-danger' %>">
+                  <%= t.type === 'income' ? '+' : '-' %><%= t.amount.toLocaleString('vi-VN') %>₫
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <% transactions.forEach((t, index)=> { %>
-                <tr data-type="<%= t.type %>">
-                  <td>
-                    <%= index + 1 %>
-                  </td>
-                  <td>
-                    <%= new Date(t.date).toLocaleDateString('vi-VN') %>
-                  </td>
-                  <td>
-                    <%= t.transaction_name %>
-                  </td>
-                  <td>
-                    <%= t.budget_id || 'Chưa có' %>
-                  </td>
-                  <td>
-                    <span class="badge <%= t.type === 'income' ? 'bg-success' : 'bg-danger' %>">
-                      <%= t.type==='income' ? 'Thu' : 'Chi' %>
-                    </span>
-                  </td>
-                  <td class="<%= t.type === 'income' ? 'text-success' : 'text-danger' %>">
-                    <%= t.type==='income' ? '+' : '-' %>
-                      <%= t.amount.toLocaleString('vi-VN') %>₫
-                  </td>
-                </tr>
-                <% }) %>
-                  <% if(transactions.length===0){ %>
-                    <tr>
-                      <td colspan="6" class="text-center">Không có giao dịch nào</td>
-                    </tr>
-                    <% } %>
-            </tbody>
-          </table>
-        </div>
+            <% }) %>
+
+            <% if (transactions.length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center text-muted">Không có giao dịch nào</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
-    </div>
+
     <script>
                   document.addEventListener("DOMContentLoaded", () => {
                 // Thông báo

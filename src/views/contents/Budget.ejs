@@ -44,7 +44,7 @@
             <div class="small" id="menuEmail">
               <%=user_details.email%>
             </div>
-            <div class="money" id="money">Số dư: 27.112.004đ</div>
+            <div class="money" id="money">Số dư: <%= balance.toLocaleString() %>đ</div>
           </div>
         </div>
         <div class="profile-actions">
@@ -83,8 +83,8 @@
           <a href="/trang_chu/themchitieu" class="chat-item">➕ Thêm chi tiêu</a>
           <a href="/trang_chu/chinhsuachitieu" class="chat-item">✏️ Chỉnh sửa khoản chi</a>
         </div>
-        <a href="/trang" class="chat-item"><i class="fa-solid fa-chart-simple"></i><span>Biểu đồ</span></a>
-        <a href="lichsu.html" class="chat-item"><i class="fa-solid fa-timeline"></i><span>Lịch sử giao dịch</span></a>
+        <a href="/trang_chu/charts" class="chat-item "><i class="fa-solid fa-chart-simple"></i><span>Biểu đồ</span></a>
+        <a href="/trang_chu/history" class="chat-item"><i class="fa-solid fa-timeline"></i><span>Lịch sử giao dịch</span></a>
       </div>
     </div>
     <div id="main-content" class="content flex-grow-1 p-4">

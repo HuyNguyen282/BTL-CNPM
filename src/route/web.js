@@ -18,7 +18,12 @@ import {
     themchitieuPage,
     chinhsuachitieuPage,
     updateBudget,
-    deleteBudget
+    deleteBudget,
+    handlethemchitieu,
+    chinhsuakhoanchi,
+    xoakhoanchi,
+    chartsPage,
+    historyPage
 } from "../controllers/homeController.js";
 
 const router = express.Router();
@@ -47,9 +52,6 @@ const initWebRoute = (app) => {
     router.post("/trang_chu/viewbud/chinhsua", checkLogin, updateBudget);
     router.post("/trang_chu/viewbud/xoa", checkLogin, deleteBudget);
 
-    router.get("/trang_chu/themchitieu", checkLogin, themchitieuPage);
-    router.get("/trang_chu/chinhsuakhoanchi", checkLogin, chinhsuachitieuPage);
-
     router.get('/api/budgets', checkLogin, async (req, res) => {
         try {
             const userId = req.session.user.id;
@@ -66,6 +68,18 @@ const initWebRoute = (app) => {
             res.status(500).json({ message: 'Lỗi server' });
         }
     });
+
+    router.get("/trang_chu/themchitieu", checkLogin, themchitieuPage);
+    router.post("/trang_chu/themchitieu", checkLogin, handlethemchitieu);
+
+    router.get("/trang_chu/chinhsuachitieu", checkLogin, chinhsuachitieuPage);
+    router.post("/trang_chu/chinhsuachitieu/chinhsua", checkLogin, chinhsuakhoanchi);
+    router.post("/trang_chu/chinhsuachitieu/xoa", checkLogin, xoakhoanchi);
+
+    router.get("/trang_chu/charts", checkLogin, chartsPage);
+
+    router.get("/trang_chu/history", checkLogin, historyPage);
+    router.post("/trang_chu/history", checkLogin, historyPage)
 
 
 
