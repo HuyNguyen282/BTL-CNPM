@@ -5,6 +5,7 @@ import crypto from "crypto";
 import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
+import { mkConfig, generateCsv, asString } from "export-to-csv";
 
 function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
@@ -538,7 +539,7 @@ export const xoakhoanchi = async (req, res) => {
 
 export const chartsPage = async (req, res) => {
     try {
-
+        if (!req.session.user) res.redirect("/");
         // Lấy thông tin user
         const user_id = req.session.user.id;
 
@@ -595,7 +596,7 @@ export const chartsPage = async (req, res) => {
 };
 
 export const historyPage = async (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+    if (!req.session.user) return res.redirect('/');
 
     const userId = req.session.user.id;
 
@@ -644,4 +645,38 @@ export const historyPage = async (req, res) => {
     }
 };
 
+export const exportFile = async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    const userId = req.session.user.id;
+    const { fromDate, toDate, type } = req.query;
 
+    let sql = "SELECT * FROM transactions WHERE user_id = ?";
+    const params = [userId];
+
+    if (fromDate) { sql += " AND date >= ?"; params.push(fromDate); }
+    if (toDate) { sql += " AND date <= ?"; params.push(toDate); }
+    if (type && type !== "all") { sql += " AND type = ?"; params.push(type); }
+
+    const [transactions] = await pool.query(sql, params);
+
+    // 👉 Làm phẳng dữ liệu trước khi export (đề phòng object con)
+    const flatData = transactions.map(t => {
+        const obj = {};
+        for (const key in t) {
+            const value = t[key];
+            if (typeof value === "object" && value !== null) {
+                obj[key] = JSON.stringify(value); // Chuyển object → chuỗi
+            } else {
+                obj[key] = value;
+            }
+        }
+        return obj;
+    });
+
+    const csvConfig = mkConfig({ useKeysAsHeaders: true });
+    const csv = generateCsv(csvConfig)(flatData);
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="lich-su-giao-dich.csv"');
+    res.send(asString(csv));
+};

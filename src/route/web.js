@@ -23,7 +23,8 @@ import {
     chinhsuakhoanchi,
     xoakhoanchi,
     chartsPage,
-    historyPage
+    historyPage,
+    exportFile
 } from "../controllers/homeController.js";
 
 const router = express.Router();
@@ -79,7 +80,9 @@ const initWebRoute = (app) => {
     router.get("/trang_chu/charts", checkLogin, chartsPage);
 
     router.get("/trang_chu/history", checkLogin, historyPage);
-    router.post("/trang_chu/history", checkLogin, historyPage)
+    router.post("/trang_chu/history", checkLogin, historyPage);
+
+    router.get("/trang_chu/history/export", checkLogin, exportFile);
 
 
 
