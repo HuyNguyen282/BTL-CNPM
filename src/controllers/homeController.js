@@ -417,7 +417,7 @@ export const handlethemchitieu = async (req, res) => {
             [transaction_name, amount, date, note, user_id, type, budget_id || null]
         );
 
-        res.redirect("/trang_chu/themchitieu");
+        res.redirect("/trang_chu/chinhsuachitieu");
     } catch (err) {
         console.error("Lỗi khi thêm chi tiêu:", err);
         res.status(500).send("Lỗi server khi thêm chi tiêu");
@@ -535,3 +535,113 @@ export const xoakhoanchi = async (req, res) => {
         res.status(500).send("Lỗi server khi xoá chi tiêu");
     }
 };
+
+export const chartsPage = async (req, res) => {
+    try {
+
+        // Lấy thông tin user
+        const user_id = req.session.user.id;
+
+        const [userDetails] = await pool.query(
+            "SELECT username, email FROM user WHERE id = ?", [user_id]);
+
+        const [balanceTotal] = await pool.query(
+            `SELECT 
+             SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) - 
+             SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS balance
+             FROM transactions 
+             WHERE user_id = ?`, [user_id]);
+
+        const user_details = userDetails[0];
+        const balance = balanceTotal[0].balance || 0;
+
+        const [rows] = await pool.query(
+            `SELECT 
+             QUARTER(date) AS quy,
+             SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS total_income,
+             SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS total_expense
+             FROM transactions
+             WHERE user_id = ?
+             AND YEAR(date) = YEAR(CURDATE())
+             GROUP BY quy
+             ORDER BY quy`, [user_id]);
+
+        const [pieChart] = await pool.query(
+            `SELECT 
+            b.budget_name AS ten_hang_muc,
+            SUM(t.amount) AS tong_chi
+            FROM transactions t
+            JOIN budgets b ON t.budget_id = b.budget_id
+            WHERE t.type = 'expense'
+            AND t.user_id = ?
+            AND YEAR(t.date) = YEAR(CURDATE())
+            GROUP BY b.budget_name`, [user_id]);
+
+        const currentYear = new Date().getFullYear();
+        const tongChitieu = rows;
+        const pieData = pieChart;
+
+        res.render("contents/Charts.ejs", {
+            user_details,
+            balance,
+            tongChitieu,
+            pieData,
+            currentYear
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Lỗi khi lấy dữ liệu biểu đồ");
+    }
+};
+
+export const historyPage = async (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    const userId = req.session.user.id;
+
+    const { fromDate, toDate, type } = req.method === 'POST' ? req.body : {};
+
+    let sql = "SELECT * FROM transactions WHERE user_id = ?";
+    const params = [userId];
+
+    if (fromDate) {
+        sql += " AND date >= ?";
+        params.push(fromDate);
+    }
+    if (toDate) {
+        sql += " AND date <= ?";
+        params.push(toDate);
+    }
+    if (type && type !== 'all') {
+        sql += " AND type = ?";
+        params.push(type);
+    }
+
+    try {
+        const [transactions] = await pool.query(sql, params);
+
+        let total_income = 0, total_expense = 0;
+        transactions.forEach(t => {
+            const amt = Number(t.amount);
+            if (t.type === 'income') total_income += amt;
+            else if (t.type === 'expense') total_expense += amt;
+        });
+
+        res.render("contents/History.ejs", {
+            user_details: req.session.user,
+            transactions,
+            total_income,
+            total_expense,
+            balance: total_income - total_expense,
+            fromDate: fromDate || '',
+            toDate: toDate || '',
+            type: type || 'all'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Lỗi server");
+    }
+};
+
+

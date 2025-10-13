@@ -21,7 +21,9 @@ import {
     deleteBudget,
     handlethemchitieu,
     chinhsuakhoanchi,
-    xoakhoanchi
+    xoakhoanchi,
+    chartsPage,
+    historyPage
 } from "../controllers/homeController.js";
 
 const router = express.Router();
@@ -73,6 +75,11 @@ const initWebRoute = (app) => {
     router.get("/trang_chu/chinhsuachitieu", checkLogin, chinhsuachitieuPage);
     router.post("/trang_chu/chinhsuachitieu/chinhsua", checkLogin, chinhsuakhoanchi);
     router.post("/trang_chu/chinhsuachitieu/xoa", checkLogin, xoakhoanchi);
+
+    router.get("/trang_chu/charts", checkLogin, chartsPage);
+
+    router.get("/trang_chu/history", checkLogin, historyPage);
+    router.post("/trang_chu/history", checkLogin, historyPage)
 
 
 
