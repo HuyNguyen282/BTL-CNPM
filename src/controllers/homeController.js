@@ -659,7 +659,7 @@ export const exportFile = async (req, res) => {
 
     const [transactions] = await pool.query(sql, params);
 
-    // 👉 Làm phẳng dữ liệu trước khi export (đề phòng object con)
+    // Làm phẳng dữ liệu trước khi export (đề phòng object con)
     const flatData = transactions.map(t => {
         const obj = {};
         for (const key in t) {
@@ -679,4 +679,29 @@ export const exportFile = async (req, res) => {
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", 'attachment; filename="lich-su-giao-dich.csv"');
     res.send(asString(csv));
+};
+
+export const notification = async (req, res) => {
+    if (!req.session.user) return res.redirect("/");
+    const userId = req.session.user.id;
+
+    const [rows] = await pool.query(
+        `SELECT transaction_name, amount, type, date
+     FROM transactions
+     WHERE user_id = ?
+     ORDER BY date DESC
+     LIMIT 5`,
+        [userId]
+    );
+
+    if (rows.length === 0) {
+        return res.json({ notifyList: [] });
+    }
+
+    const notifyList = rows.map(t => ({
+        message: `Bạn ${t.type === 'income' ? 'nhận' : 'chi'} ${t.amount.toLocaleString('vi-VN')
+            }₫ cho "${t.transaction_name}" vào ${new Date(t.date).toLocaleString('vi-VN')}.`
+    }));
+
+    res.json({ notifyList });
 };

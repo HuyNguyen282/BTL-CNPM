@@ -24,7 +24,8 @@ import {
     xoakhoanchi,
     chartsPage,
     historyPage,
-    exportFile
+    exportFile,
+    notification
 } from "../controllers/homeController.js";
 
 const router = express.Router();
@@ -83,6 +84,7 @@ const initWebRoute = (app) => {
     router.post("/trang_chu/history", checkLogin, historyPage);
 
     router.get("/trang_chu/history/export", checkLogin, exportFile);
+    router.get("/trang_chu/notification", checkLogin, notification)
 
 
 
