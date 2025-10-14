@@ -193,3 +193,8 @@ body {
 .btn-notify:focus {
   box-shadow: 0 0 0 0.2rem rgba(255, 204, 0, 0.4);
 }
+
+#notificationBox {
+  color: #333;
+  /* Đổi màu chữ trong hộp thông báo thành màu đen/xám đậm */
+}

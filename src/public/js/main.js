@@ -1,38 +1,62 @@
 // js/main.js (Phiên bản chuẩn)
 
 document.addEventListener("DOMContentLoaded", () => {
+          
+            const bellBtn = document.getElementById("bellBtn");
+            const notificationBox = document.getElementById("notificationBox");
+            const notificationList = document.getElementById("notificationList");
+            const userBtn = document.getElementById("userBtn");
+            const userMenu = document.getElementById("userMenu");
 
-  // ====== MENU AVATAR ======
-  const userBtn = document.getElementById('userBtn');
-  const userMenu = document.getElementById('userMenu');
-  if (userBtn && userMenu) {
-    userBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userMenu.classList.toggle('d-none');
-    });
-    document.addEventListener('click', (e) => {
-      if (!userMenu.classList.contains('d-none') && !userMenu.contains(e.target)) {
-        userMenu.classList.add('d-none');
-      }
-    });
-  }
+            // Bấm chuông -> hiện thông báo
+            if (bellBtn && notificationBox) {
+              bellBtn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                notificationBox.classList.toggle("d-none");
 
-  // ====== THÔNG BÁO ======
-  const bellBtn = document.getElementById("bellBtn");
-  const notificationBox = document.getElementById("notificationBox");
-  if (bellBtn && notificationBox) {
-    bellBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      notificationBox.classList.toggle("d-none");
-    });
-    document.addEventListener("click", (e) => {
-      if (!notificationBox.classList.contains("d-none") && !notificationBox.contains(e.target)) {
-        notificationBox.classList.add("d-none");
-      }
-    });
-    // (Tùy chọn) Bạn có thể thêm logic load thông báo từ API ở đây
-  }
+                // Nếu bật hộp thì load thông báo
+                if (!notificationBox.classList.contains("d-none")) {
+                  const res = await fetch("/trang_chu/notification");
+                  const data = await res.json();
 
+                  notificationList.innerHTML = "";
+
+                  if (data.notifyList && data.notifyList.length > 0) {
+                    data.notifyList.forEach(n => {
+                      const li = document.createElement("li");
+                      li.classList.add("border-bottom", "py-1");
+                      li.textContent = n.message;
+                      notificationList.appendChild(li);
+                    });
+                  } else {
+                    notificationList.innerHTML = "<li class='text-muted'>Không có thông báo mới</li>";
+                  }
+                }
+              });
+            }
+
+            // Menu người dùng
+            if (userBtn && userMenu) {
+              userBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                userMenu.classList.toggle("d-none");
+              });
+            }
+
+            // Click ra ngoài -> ẩn mọi popup
+            document.addEventListener("click", (e) => {
+              if (!notificationBox.classList.contains("d-none") &&
+                !notificationBox.contains(e.target) &&
+                !bellBtn.contains(e.target)) {
+                notificationBox.classList.add("d-none");
+              }
+              if (!userMenu.classList.contains("d-none") &&
+                !userMenu.contains(e.target) &&
+                !userBtn.contains(e.target)) {
+                userMenu.classList.add("d-none");
+              }
+            });
+          });
   // ====== SIDEBAR TOGGLE (THU GỌN) ======
   const toggleBtn = document.querySelector('.toggle-btn');
   const sidebar = document.querySelector('.sidebar');
@@ -72,4 +96,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-});
