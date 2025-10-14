@@ -14,15 +14,19 @@ Phần mềm quản lý tài chính cá nhân là công cụ giúp người dùn
 - Bootstrap
 - NodeJS
 #### Hướng dẫn cài đặt và sử dụng 
-**Bước 1**: Cài đặt
-    -Mở CMD cd về thư mục muốn lưu repo
-    -Copy lệnh: `git clone git@github.com:HuyNguyen282/BTL-CNPM.git`
-    -Cài đặt package cần thiết: `npm ci (hoặc npm install)`
-**Bước 2**: Chỉnh database
--Truy cập theo đường dẫn `/src/config/connectDB.js`
--Đổi host, user, password theo **MySQL Workbench** trên máy
--Mở **MySQL Workbench**, và copy file **Database.sql** vào và khởi tạo.
-**Bước 3**: Chạy trên localhost
-- `npm start`
-- Terminal sẽ hiện ra đường dẫn localhost
+**Bước 1**: Cài đặt  
+- Mở CMD cd về thư mục muốn lưu repo  
+- Copy lệnh: `git clone git@github.com:HuyNguyen282/BTL-CNPM.git`  
+- Cài đặt package cần thiết: `npm ci (hoặc npm install)`
+
+  
+**Bước 2**: Chỉnh database  
+- Truy cập theo đường dẫn `/src/config/connectDB.js`  
+- Đổi host, user, password theo **MySQL Workbench** trên máy  
+- Mở **MySQL Workbench**, và copy file **Database.sql** vào và khởi tạo.
+
+  
+**Bước 3**: Chạy trên localhost  
+- `npm start`  
+- Terminal sẽ hiện ra đường dẫn localhost  
 - `Ctrl + Click` để tự động chuyển sang trình duyệt
