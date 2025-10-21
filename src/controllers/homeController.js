@@ -6,6 +6,9 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import { mkConfig, generateCsv, asString } from "export-to-csv";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
@@ -100,7 +103,7 @@ export const handleSendMail = async (req, res) => {
             },
         });
 
-        const resetLink = `http://localhost:2006/forgot?token=${token}&email=${email}`;
+        const resetLink = `http://localhost:8080/forgot?token=${token}&email=${email}`;
 
         await transporter.sendMail({
             from: '"Egghead App" <no-reply@egghead.com>',

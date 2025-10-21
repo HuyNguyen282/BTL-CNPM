@@ -19,3 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("📄 Xuất dữ liệu sang PDF (demo)");
   });
 });
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleThemeBtn = document.querySelector(".toggle-theme");
+  const body = document.body;
+
+  // Kiểm tra chế độ được lưu
+  if (localStorage.getItem("theme") === "dark") {
+    body.classList.add("dark-mode");
+    toggleThemeBtn.textContent = "☀️ Chế độ sáng";
+  }
+
+  toggleThemeBtn.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    const isDark = body.classList.contains("dark-mode");
+    toggleThemeBtn.textContent = isDark ? "☀️ Chế độ sáng" : "🌙 Chế độ tối";
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  });
+});

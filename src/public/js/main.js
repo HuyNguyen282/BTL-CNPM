@@ -96,3 +96,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleBtn = document.querySelector(".toggle-theme"); // nút "Chế độ tối/sáng"
+  const body = document.body;
+
+  // Kiểm tra chế độ đã lưu
+  if (localStorage.getItem("theme") === "dark") {
+    body.classList.add("dark-mode");
+    if (toggleBtn) toggleBtn.textContent = "☀️ Chế độ sáng";
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      body.classList.toggle("dark-mode");
+      const isDark = body.classList.contains("dark-mode");
+
+      toggleBtn.textContent = isDark ? "☀️ Chế độ sáng" : "🌙 Chế độ tối";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+  }
+});

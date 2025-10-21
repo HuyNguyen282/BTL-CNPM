@@ -16,6 +16,7 @@
   transition: transform 0.12s ease;
 }
 
+
 .user-avatar:active {
   transform: scale(0.98);
 }
@@ -72,7 +73,7 @@
   border-radius: 6px;
   text-decoration: none;
   /* Bỏ gạch chân */
-  color: #212529;
+  color: #212529 !important;
 }
 
 .user-dropdown .profile-actions a:hover {
@@ -197,4 +198,156 @@ body {
 #notificationBox {
   color: #333;
   /* Đổi màu chữ trong hộp thông báo thành màu đen/xám đậm */
+}
+/* === DARK MODE TOÀN TRANG === */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* NAVBAR + SIDEBAR */
+.dark-mode .navbar {
+  background-color: #1f1f1f !important;
+  border-bottom: 1px solid #333;
+}
+.dark-mode .sidebar {
+  background-color: #1a1a1a !important;
+  border-right: 1px solid #333;
+}
+.dark-mode .sidebar a {
+  color: #bdbdbd;
+}
+.dark-mode .sidebar a.active,
+.dark-mode .sidebar a:hover {
+  background-color: #333;
+  color: #fff !important;
+}
+
+/* === MAIN CONTENT === */
+.dark-mode #main-content {
+  background-color: #181818;
+  color: #e0e0e0;
+}
+
+/* === CARD === */
+.dark-mode .card {
+  background-color: #1f1f1f !important;
+  border-color: #333;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+/* === BUTTON === */
+.dark-mode .btn-outline-primary {
+  color: #9cdcfe;
+  border-color: #9cdcfe;
+}
+.dark-mode .btn-outline-primary:hover {
+  background-color: #9cdcfe;
+  color: #000;
+}
+
+/* === TEXT COLOR FIX === */
+.dark-mode h2,
+.dark-mode .card-title,
+.dark-mode p,
+.dark-mode h3,
+.dark-mode span {
+  color: #e0e0e0 !important;
+}
+.dark-mode .text-success {
+  color: #9be69b !important;
+}
+.dark-mode .text-danger {
+  color: #ff8a80 !important;
+}
+
+/* === DROPDOWN (profile box) === */
+.dark-mode .dropdown-menu {
+  background-color: #1f1f1f;
+  color: #fff;
+  border-color: #333;
+}
+.dark-mode .dropdown-item {
+  color: #ddd;
+}
+.dark-mode .dropdown-item:hover {
+  background-color: #333;
+}
+.user-dropdown .profile-actions {
+  background-color: #fff !important; /* Đảm bảo nền luôn trắng */
+}
+
+.user-dropdown .profile-actions a,
+.user-dropdown .profile-actions button.dropdown-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: #212529 !important;
+}
+
+.user-dropdown .profile-actions a span {
+  /* Dùng màu #212529 (màu gốc của bạn) cho đồng bộ */
+  color: #212529 !important; 
+}
+.user-dropdown .profile-actions a:hover,
+.user-dropdown .profile-actions button.dropdown-item:hover {
+  background: #f8f9fa; /* Màu hover gốc của bạn */
+}
+
+/* Giữ quy tắc riêng cho nút "Đăng xuất" màu đỏ */
+.user-dropdown .profile-actions a.text-danger,
+.user-dropdown .profile-actions a.text-danger span,
+.user-dropdown .profile-actions a.text-danger i {
+  color: #dc3545 !important;
+}
+/* ====== DARK MODE ====== */
+body.dark-mode {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .navbar,
+body.dark-mode .sidebar,
+body.dark-mode .content,
+body.dark-mode .card,
+body.dark-mode .table,
+body.dark-mode .bg-white {
+  background-color: #1e1e1e !important;
+  color: #f1f1f1 !important;
+}
+
+body.dark-mode .table thead {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .chat-item,
+body.dark-mode .submenu a {
+  color: #ddd !important;
+}
+
+body.dark-mode .chat-item.active {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+body.dark-mode label,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h6 {
+  color: #f1f1f1 !important;
+}
+
+/* Giữ nguyên màu dropdown user menu (không ảnh hưởng) */
+.user-dropdown {
+  background-color: #fff !important;
+  color: #000 !important;
 }
